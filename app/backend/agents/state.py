@@ -13,11 +13,11 @@ class ResearcherAgent(TypedDict):
 
 class WriterAgent(TypedDict):
     draft: str
-
+    retry_count: int #IF retry_count >= 3 THE PROCESS WILL BE FINISHED
+#WRITER AGENT IS MORE LIKELY TO FAIL
 class FastCheckerAgent(TypedDict):
     verified: Optional[bool]
     failed_facts: list[str]
-    retry_count: int #IF retry_count >= 3 THE PROCESS WILL BE FINISHED
 
 class PolisherAgent(TypedDict):
     final_post: str

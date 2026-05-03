@@ -12,12 +12,12 @@ class ResearcherAgentSchema(BaseModel):
 
 class WriterAgentSchema(BaseModel):
     draft: str = ""
+    retry_count: int = 0
 
 
 class FastCheckerAgentSchema(BaseModel):
     verified: Optional[bool] = None
     failed_facts: list[str] = []
-    retry_count: int = 0
 
 
 class PolisherAgentSchema(BaseModel):

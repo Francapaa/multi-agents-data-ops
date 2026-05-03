@@ -40,10 +40,14 @@ def writer_node(state: AgentState):
     ]
 
     reply = llm.invoke(messages)
-    draft = getattr(reply, "content", str(reply)).strip() 
-    #extract content, if it doesnt contain anything we extract the message
-    print("AI DRAFT GENERATED:\n",draft)
+    draft = getattr(reply, "content", str(reply)).strip()
+    prev = state.get("writer") or {}
+    attempts = int(prev.get("retry_count") or 0)
+    print("AI DRAFT GENERATED:\n", draft)
     return {
-        "writer": {"draft": draft},
+        "writer": {
+            "draft": draft,
+            "retry_count": attempts + 1,
+        },
         "current_agent": state.get("current_agent"),
     }
