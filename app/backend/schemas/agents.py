@@ -4,7 +4,7 @@ from typing import Optional
 
 
 class ResearcherAgentSchema(BaseModel):
-    search_querie: list[str] = []
+    search_queries: list[str] = []
     sources: list[str] = []
     facts: list[str] = []
     context: str = ""

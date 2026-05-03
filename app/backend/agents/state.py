@@ -1,13 +1,12 @@
 #WE DEFINE TYPEDICT WITH THE GRAPH STATE
-from io import Writer
 from typing import Optional
 import uuid
-from typing_extensions import TypedDict, Annotated
+from typing_extensions import TypedDict
 
 
 #WE DEFINE THE STATE OF EVERY AGENT, BUT THEN THEY SHARE THE LOGIC IN AGENTSTATE
 class ResearcherAgent(TypedDict):
-    search_querie: list[str]
+    search_queries: list[str]
     sources: list[str]
     facts: list[str]
     context: str
