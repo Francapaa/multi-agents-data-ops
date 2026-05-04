@@ -9,7 +9,10 @@ class CheckerOutput(BaseModel):
     failed_facts: list[str] = Field(
         description="Facts that are missing, contradicted, or distorted in the draft."
     )
-    
+    confidence: float = Field(
+        description="Confidence score from 0.0 to 1.0 for the verification judgment."
+    )
+
 #we make sure that the llm will answer with this type
 
 llm = llm_connection()
@@ -29,7 +32,8 @@ def checker_node(state: AgentState):
         return {
             "fastChecker": {
             "verified": False, 
-            "failed_facts": []
+            "failed_facts": [],
+            "confidence": 0.0,
             },
             "error": "Checker skipped: no research facts available.",
             "current_agent": state.get("current_agent"),
@@ -39,7 +43,8 @@ def checker_node(state: AgentState):
         return {
             "fastChecker": {
                 "verified": False, 
-                "failed_facts": []
+                "failed_facts": [],
+                "confidence": 0.0,
                 },
             "error": "Checker skipped: no draft generated in writer agent.",
             "current_agent": state.get("current_agent"),
@@ -49,7 +54,8 @@ def checker_node(state: AgentState):
         return {
             "fastChecker": {
                 "verified": False, 
-                "failed_facts": []
+                "failed_facts": [],
+                "confidence": 0.0,
                 },
             "error": "Checker skipped: LLM is not configured.",
             "current_agent": state.get("current_agent"),
@@ -61,16 +67,20 @@ def checker_node(state: AgentState):
         "Compare the WRITER DRAFT against the RESEARCH FACTS.\n"
         "Mark verified=True only if the draft does not contradict facts and covers them accurately.\n"
         "For failed_facts, include only facts that are contradicted, missing, or meaningfully distorted.\n"
+        "Set confidence as a float in [0,1]. Use >=0.9 only when evidence is clearly strong and consistent.\n"
         "Be concise and evidence-based. DO NOT INVENT FACTS.\n\n"
         f"## RESEARCH FACTS\n{facts_block}\n\n"
         f"## WRITER DRAFT\n{draft}"
     )
 
     result = structured_llm.invoke(checker_prompt)
+
+    print(result) 
     return {
         "fastChecker": {
             "verified": result.verified,
             "failed_facts": result.failed_facts,
+            "confidence": float(result.confidence),
         },
         "error": None,
         "current_agent": state.get("current_agent"),

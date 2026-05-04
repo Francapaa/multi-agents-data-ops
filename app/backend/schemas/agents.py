@@ -18,6 +18,7 @@ class WriterAgentSchema(BaseModel):
 class FastCheckerAgentSchema(BaseModel):
     verified: Optional[bool] = None
     failed_facts: list[str] = []
+    confidence: float = 0.0
 
 
 class PolisherAgentSchema(BaseModel):

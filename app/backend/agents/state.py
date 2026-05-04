@@ -18,6 +18,8 @@ class WriterAgent(TypedDict):
 class FastCheckerAgent(TypedDict):
     verified: Optional[bool]
     failed_facts: list[str]
+    confidence: float
+    codn
 
 class PolisherAgent(TypedDict):
     final_post: str
