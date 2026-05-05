@@ -26,7 +26,8 @@ workflow.add_conditional_edges(
         "writer": "writer",
         "fast_checker": "fast_checker",
         END: END,
-    }, #depending on the return statement 
+    }, #depending on the return statement  
+       # # if attemps > 3 we'll finish the process
 )
 workflow.add_conditional_edges(
     "fast_checker",

@@ -28,7 +28,7 @@ def route_after_writer(state: AgentState):
     if not is_writer_draft_too_short(draft):
         return "fast_checker"
     if attempts >= WRITER_RETRY_LIMIT:
-        return END
+        return END # if attemps > 3 we'll finish the process
     return "writer"
 
 
