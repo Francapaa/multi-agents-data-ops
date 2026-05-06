@@ -62,7 +62,7 @@ def polisher_node(state: AgentState):
         f"## FAILED FACTS TO FIX\n{failed_facts_block}\n\n"
         f"## WRITER DRAFT\n{draft}"
     )
-
+    
     result = structured_llm.invoke(prompt)
     polished = postprocess_polished_output(result.final_post)
     is_valid, errors = validate_polished_output(polished)
