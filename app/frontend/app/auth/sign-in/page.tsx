@@ -1,14 +1,23 @@
 import { Card, AnimatedContainer } from "@/lib/components/ui";
 import { SignInForm } from "./components";
+import { redirect } from "next/navigation";
+import {auth} from '@/lib/auth/server'
 
 export const metadata = {
   title: "Sign In - Multi-Agent DataOps",
   description: "Sign in to your account",
 };
 
-export default function SignInPage() {
+export default async function SignInPage() {
+
+  const {data: session} = await auth.getSession();
+
+  if (session?.user){
+    redirect("/dashboard");
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-100 p-4">
       <AnimatedContainer className="w-full max-w-md">
         <Card>
           <div className="text-center mb-8">

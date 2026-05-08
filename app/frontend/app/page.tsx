@@ -1,12 +1,9 @@
-import { auth } from "@/lib/auth/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const { data: session } = await auth.getSession();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,7 +35,7 @@ export default async function Home() {
           </div>
         </div>
       </header>
-      <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
+      <main className="flex-1 flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-100">
         <div className="text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
             Multi-Agent DataOps
@@ -46,11 +43,6 @@ export default async function Home() {
           <p className="text-xl text-gray-600 mb-8">
             AI-powered data pipeline automation
           </p>
-          {session?.user && (
-            <p className="text-lg text-blue-600 mb-8">
-              Welcome back, {session.user.name || session.user.email}!
-            </p>
-          )}
         </div>
       </main>
     </div>
