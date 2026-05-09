@@ -8,9 +8,9 @@ from psycopg import AsyncConnection
 
 class Database:
     def __init__(self):
-        self._connection_string = os.getenv("NEON_DATABASE_URL")
+        self._connection_string = os.getenv("NEON_DATABASE_CONNECTION_STRING")
         if not self._connection_string:
-            raise ValueError("NEON_DATABASE_URL is not set")
+            raise ValueError("NEON_DATABASE_CONNECTION STRING is not set")
 
     @asynccontextmanager
     async def connect(self) -> AsyncGenerator[AsyncConnection, None]:
