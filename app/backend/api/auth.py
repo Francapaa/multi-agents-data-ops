@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 import os
-from authlib.integrations.starlette_client import oauth
+import oauth
 from ..services.auth import auth_service
 
 

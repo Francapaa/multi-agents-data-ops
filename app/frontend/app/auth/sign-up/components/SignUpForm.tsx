@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { signUpWithEmail } from "../actions";
 import { Input, Button, ErrorMessage } from "@/lib/components/ui";
+import { PasswordInput } from "@neondatabase/auth/react";
 
 export default function SignUpForm() {
   const [state, formAction, isPending] = useActionState(signUpWithEmail, null);
@@ -25,14 +26,7 @@ export default function SignUpForm() {
         placeholder="john@example.com"
       />
 
-      <Input
-        label="Password"
-        name="password"
-        type="password"
-        required
-        placeholder="••••••••"
-        minLength={8}
-      />
+      <PasswordInput/>
 
       <ErrorMessage message={state?.error || ""} />
 
