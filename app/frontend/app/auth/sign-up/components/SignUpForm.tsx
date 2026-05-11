@@ -26,7 +26,15 @@ export default function SignUpForm() {
         placeholder="john@example.com"
       />
 
-      <PasswordInput/>
+      <Input
+        label="Password"
+        name="password"
+        type="password"
+        required
+        placeholder="123..."
+      />
+
+
 
       <ErrorMessage message={state?.error || ""} />
 

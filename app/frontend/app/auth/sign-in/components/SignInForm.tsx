@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 import { signInWithEmail } from "../actions";
 import { Input, Button, ErrorMessage } from "@/lib/components/ui";
-import { PasswordInput } from "@neondatabase/auth/react";
 import Link from "next/link";
 import SocialLogin from "./SocialLogin";
 
@@ -19,8 +18,13 @@ export default function SignInForm() {
         required
         placeholder="john@example.com"
       />
-      
-      <PasswordInput/>
+      <Input
+        label="Password"
+        name="password"
+        type="password"
+        required
+        placeholder="123..."
+      />
 
       <div className="flex justify-end">
         <Link
