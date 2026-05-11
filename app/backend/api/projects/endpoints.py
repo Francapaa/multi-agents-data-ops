@@ -4,10 +4,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from dependencies import get_current_user
-from config.database import get_db
-
-from ...config.database import Database
+from config.database import Database, get_db
+from dependencies import get_current_user, get_user_id_from_payload
+from services import projects as projects_service
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -30,58 +29,22 @@ class ProjectListResponse(BaseModel):
     projects: list[ProjectResponse]
 
 
+def _require_user_uuid(user: dict) -> UUID:
+    try:
+        return get_user_id_from_payload(user)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+
 @router.get("", response_model=ProjectListResponse)
 async def list_projects(
     user: dict = Depends(get_current_user),
     database: Database = Depends(get_db),
 ):
     """List all projects for the current user."""
-    user_id = user.get("sub") or user.get("id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    projects_data = await database.execute(
-        """
-        SELECT id, title, status, created_at
-        FROM projects
-        WHERE user_id = $1
-        ORDER BY created_at DESC
-        """,
-        (user_id,),
-    )
-
-    result = []
-    for project in projects_data:
-        posts_data = await database.execute(
-            """
-            SELECT id, final_post, failed_facts
-            FROM posts
-            WHERE project_id = $1
-            LIMIT 1
-            """,
-            (str(project["id"]),),
-        )
-
-        post = None
-        if posts_data:
-            post_data = posts_data[0]
-            post = ProjectPostResponse(
-                id=post_data["id"],
-                final_post=post_data.get("final_post"),
-                failed_facts=post_data.get("failed_facts"),
-            )
-
-        result.append(
-            ProjectResponse(
-                id=project["id"],
-                title=project["title"],
-                status=project["status"],
-                created_at=str(project["created_at"]),
-                post=post,
-            )
-        )
-
-    return ProjectListResponse(projects=result)
+    user_id = _require_user_uuid(user)
+    items = await projects_service.list_projects_for_user(database, user_id)
+    return ProjectListResponse(projects=[ProjectResponse(**item) for item in items])
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
@@ -91,47 +54,8 @@ async def get_project(
     database: Database = Depends(get_db),
 ):
     """Get a specific project by ID."""
-    user_id = user.get("sub") or user.get("id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    projects_data = await database.execute(
-        """
-        SELECT id, title, status, created_at
-        FROM projects
-        WHERE id = $1 AND user_id = $2
-        """,
-        (str(project_id), user_id),
-    )
-
-    if not projects_data:
+    user_id = _require_user_uuid(user)
+    payload = await projects_service.get_project_for_user(database, user_id, project_id)
+    if not payload:
         raise HTTPException(status_code=404, detail="Project not found")
-
-    project = projects_data[0]
-
-    posts_data = await database.execute(
-        """
-        SELECT id, final_post, failed_facts
-        FROM posts
-        WHERE project_id = $1
-        LIMIT 1
-        """,
-        (str(project_id),),
-    )
-
-    post = None
-    if posts_data:
-        post_data = posts_data[0]
-        post = ProjectPostResponse(
-            id=post_data["id"],
-            final_post=post_data.get("final_post"),
-            failed_facts=post_data.get("failed_facts"),
-        )
-
-    return ProjectResponse(
-        id=project["id"],
-        title=project["title"],
-        status=project["status"],
-        created_at=str(project["created_at"]),
-        post=post,
-    )
+    return ProjectResponse(**payload)
