@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth/server";
-import { getProjects } from "./actions";
-import { ProjectsOverview, CreateProjectButton, UserAvatar } from "./components";
+import {
+  CreateProjectButton,
+  DashboardClient,
+  UserAvatar,
+} from "./components";
 
 export const metadata = {
   title: "Dashboard - DataOps",
@@ -8,19 +11,14 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stream?: string }>;
+}) {
   const { data: session } = await auth.getSession();
-
-  let totalProjects = 0;
-  let isLoading = true;
-
-  try {
-    const data = await getProjects();
-    totalProjects = data.projects.length;
-    isLoading = false;
-  } catch {
-    isLoading = false;
-  }
+  const sp = await searchParams;
+  const accessToken = session?.session?.token ?? null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -38,9 +36,13 @@ export default async function DashboardPage() {
       </header>
 
       <div className="max-w-4xl mx-auto py-12 px-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <ProjectsOverview totalProjects={totalProjects} isLoading={isLoading} />
-          <div className="flex items-center">
+        <DashboardClient
+          accessToken={accessToken}
+          streamProjectId={sp.stream}
+        />
+
+        <div className="flex justify-center py-8 mt-8">
+          <div className="w-full max-w-md">
             <CreateProjectButton />
           </div>
         </div>

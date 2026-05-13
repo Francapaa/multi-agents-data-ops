@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 
-from ..llm_connection import llm_connection
+from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
 from ..state import AgentState
+from ..validators.workflow_validations import CHECKER_CONFIDENCE_THRESHOLD
 
 
 class CheckerOutput(BaseModel):
@@ -13,10 +14,11 @@ class CheckerOutput(BaseModel):
         description="Confidence score from 0.0 to 1.0 for the verification judgment."
     )
 
-#we make sure that the llm will answer with this type
 
 llm = llm_connection()
-structured_llm = llm.with_structured_output(CheckerOutput) if llm else None
+structured_llm = (
+    llm.with_structured_output(CheckerOutput, include_raw=True) if llm else None
+)
 
 
 def checker_node(state: AgentState):
@@ -28,35 +30,30 @@ def checker_node(state: AgentState):
     facts = [f.strip() for f in (researcher_blob.get("facts") or []) if f and f.strip()]
     draft: str = (writer_blob.get("draft") or "").strip()
 
+    base_fast = {
+        "verified": False,
+        "failed_facts": [],
+        "confidence": 0.0,
+        "requested_writer_retry": False,
+    }
+
     if not facts:
         return {
-            "fastChecker": {
-            "verified": False, 
-            "failed_facts": [],
-            "confidence": 0.0,
-            },
+            "fastChecker": base_fast,
             "error": "Checker skipped: no research facts available.",
             "current_agent": state.get("current_agent"),
         }
 
     if not draft:
         return {
-            "fastChecker": {
-                "verified": False, 
-                "failed_facts": [],
-                "confidence": 0.0,
-                },
+            "fastChecker": base_fast,
             "error": "Checker skipped: no draft generated in writer agent.",
             "current_agent": state.get("current_agent"),
         }
 
     if not structured_llm:
         return {
-            "fastChecker": {
-                "verified": False, 
-                "failed_facts": [],
-                "confidence": 0.0,
-                },
+            "fastChecker": base_fast,
             "error": "Checker skipped: LLM is not configured.",
             "current_agent": state.get("current_agent"),
         }
@@ -73,15 +70,27 @@ def checker_node(state: AgentState):
         f"## WRITER DRAFT\n{draft}"
     )
 
-    result = structured_llm.invoke(checker_prompt)
+    raw_out = structured_llm.invoke(checker_prompt)
+    usage_delta = {"input": 0, "output": 0}
+    if isinstance(raw_out, dict) and "parsed" in raw_out:
+        result = raw_out["parsed"]
+        usage_delta = extract_usage_metadata(raw_out.get("raw"))
+    else:
+        result = raw_out
 
-    print(result) 
+    confidence = float(result.confidence)
+    requested = confidence < CHECKER_CONFIDENCE_THRESHOLD
+
+    print(result)
+    metrics = merge_usage(dict(state), usage_delta)
     return {
         "fastChecker": {
             "verified": result.verified,
             "failed_facts": result.failed_facts,
-            "confidence": float(result.confidence),
+            "confidence": confidence,
+            "requested_writer_retry": requested,
         },
         "error": None,
         "current_agent": state.get("current_agent"),
+        **metrics,
     }

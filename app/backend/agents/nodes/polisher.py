@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from ..llm_connection import llm_connection
+from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
 from ..state import AgentState
 from ..validators import postprocess_polished_output, validate_polished_output
 
@@ -12,7 +12,9 @@ class PolisherOutput(BaseModel):
 
 
 llm = llm_connection()
-structured_llm = llm.with_structured_output(PolisherOutput) if llm else None
+structured_llm = (
+    llm.with_structured_output(PolisherOutput, include_raw=True) if llm else None
+)
 
 
 def polisher_node(state: AgentState):
@@ -62,10 +64,18 @@ def polisher_node(state: AgentState):
         f"## FAILED FACTS TO FIX\n{failed_facts_block}\n\n"
         f"## WRITER DRAFT\n{draft}"
     )
-    
-    result = structured_llm.invoke(prompt)
+
+    raw_out = structured_llm.invoke(prompt)
+    usage_delta = {"input": 0, "output": 0}
+    if isinstance(raw_out, dict) and "parsed" in raw_out:
+        result = raw_out["parsed"]
+        usage_delta = extract_usage_metadata(raw_out.get("raw"))
+    else:
+        result = raw_out
+
     polished = postprocess_polished_output(result.final_post)
     is_valid, errors = validate_polished_output(polished)
+    metrics = merge_usage(dict(state), usage_delta)
 
     if not is_valid:
         fallback = postprocess_polished_output(draft)
@@ -73,10 +83,12 @@ def polisher_node(state: AgentState):
             "polisherAgent": {"final_post": fallback},
             "error": f"Polisher validation failed: {'; '.join(errors)}",
             "current_agent": state.get("current_agent"),
+            **metrics,
         }
 
     return {
         "polisherAgent": {"final_post": polished},
         "error": None,
         "current_agent": state.get("current_agent"),
+        **metrics,
     }

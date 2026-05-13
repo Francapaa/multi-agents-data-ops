@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
+import {auth} from '@/lib/auth/server'
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+
+  const {data: session} = await auth.getSession();
+
+  if (session?.user){
+    redirect("/dashboard");
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

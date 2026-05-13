@@ -14,7 +14,7 @@ export async function getProjects(): Promise<ProjectListResponse> {
 
   const response = await fetch(`${BACKEND_URL}/api/projects`, {
     headers: {
-      Authorization: `Bearer ${session.accessToken}`,
+      Authorization: `Bearer ${session.data?.session.token}`,
     },
     cache: "no-store",
   });

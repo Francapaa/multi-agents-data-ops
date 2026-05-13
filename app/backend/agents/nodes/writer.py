@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from ..llm_connection import llm_connection
+from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
 from ..state import AgentState
 
 llm = llm_connection()
@@ -49,7 +49,7 @@ def writer_node(state: AgentState):
                 ),
             ),
         ]
-    else: # if not failed_facts_block (the first workflow)
+    else:
         messages = [
             SystemMessage(
                 content=(
@@ -68,17 +68,25 @@ def writer_node(state: AgentState):
             ),
         ]
 
-    #if failed_facts_block we pass as argument to the llm
+    usage_delta = {"input": 0, "output": 0}
+    draft = ""
 
-    reply = llm.invoke(messages)
-    draft = getattr(reply, "content", str(reply)).strip()
+    if llm:
+        reply = llm.invoke(messages)
+        draft = getattr(reply, "content", str(reply)).strip()
+        usage_delta = extract_usage_metadata(reply)
+    else:
+        draft = "(Writer skipped: LLM not configured.)"
+
     prev = state.get("writer") or {}
     attempts = int(prev.get("retry_count") or 0)
     print("AI DRAFT GENERATED:\n", draft)
+    metrics = merge_usage(dict(state), usage_delta)
     return {
         "writer": {
             "draft": draft,
             "retry_count": attempts + 1,
         },
         "current_agent": state.get("current_agent"),
+        **metrics,
     }

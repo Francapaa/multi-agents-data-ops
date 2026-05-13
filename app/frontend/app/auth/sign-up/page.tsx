@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-100 p-4">
       <AnimatedContainer className="w-full max-w-md">
         <Card>
           <div className="text-center mb-8">
