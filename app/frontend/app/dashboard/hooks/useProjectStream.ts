@@ -15,10 +15,16 @@ type StreamState = {
   error: string | null;
 };
 
-function parseSseBlocks(buffer: string): { events: { event: string; data: string }[]; rest: string } {
+type Event ={
+  event: string,
+  data: string
+}
+
+
+function parseSseBlocks(buffer: string): { events:Event[]; rest: string } {
   const parts = buffer.split("\n\n");
   const rest = parts.pop() ?? "";
-  const events: { event: string; data: string }[] = [];
+  const events: Event[] = [];
   for (const block of parts) {
     if (!block.trim() || block.startsWith(":")) continue;
     let event = "message";
@@ -73,9 +79,10 @@ export function useProjectStream(
         }
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
+        let finished = false
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done || finished) break;
           buf += decoder.decode(value, { stream: true });
           const { events, rest } = parseSseBlocks(buf);
           buf = rest;
@@ -102,6 +109,7 @@ export function useProjectStream(
                 complete: p ?? null,
                 progress: 100,
               }));
+              finished = true
             }
             if (event === "error") {
               const msg =
@@ -109,6 +117,7 @@ export function useProjectStream(
                   ? String((payload as { detail: unknown }).detail)
                   : String(payload);
               setState((s) => ({ ...s, error: msg }));
+              finished = true // finaliza pero por error
             }
           }
         }

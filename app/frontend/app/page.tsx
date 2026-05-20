@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
 
   const {data: session} = await auth.getSession();
+  const accessToken = session?.session?.token ?? null;
 
-  if (session?.user){
+  if (accessToken){
     redirect("/dashboard");
   }
 

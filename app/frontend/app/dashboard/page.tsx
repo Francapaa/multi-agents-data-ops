@@ -1,9 +1,10 @@
+import {redirect} from 'next/navigation'; 
 import { auth } from "@/lib/auth/server";
 import {
   CreateProjectButton,
   DashboardClient,
   UserAvatar,
-} from "./components";
+} from "./components"; // componentes de dashboard
 
 export const metadata = {
   title: "Dashboard - DataOps",
@@ -20,12 +21,17 @@ export default async function DashboardPage({
   const sp = await searchParams;
   const accessToken = session?.session?.token ?? null;
 
+  if (!accessToken){
+    redirect('/login')
+  }
+
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-100">
         <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          {session?.user && (
+          {session?.user && session?.user.image && (
             <UserAvatar
               imageUrl={session.user.image}
               name={session.user.name || session.user.email}
