@@ -2,17 +2,11 @@ import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
 import {auth} from '@/lib/auth/server'
 import { redirect } from "next/navigation";
+import { AnimatedContainer, Button } from "@/lib/components/ui";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-
-  const {data: session} = await auth.getSession();
-  const accessToken = session?.session?.token ?? null;
-
-  if (accessToken){
-    redirect("/dashboard");
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -24,7 +18,7 @@ export default async function Home() {
             </div>
             <div className="flex items-center gap-4">
               <SignedIn>
-                <UserButton />
+                <UserButton size="icon" />
               </SignedIn>
               <SignedOut>
                 <Link
@@ -52,6 +46,7 @@ export default async function Home() {
           <p className="text-xl text-gray-600 mb-8">
             AI-powered data pipeline automation
           </p>
+            <Link className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"href="/dashboard">Dashboard</Link>
         </div>
       </main>
     </div>

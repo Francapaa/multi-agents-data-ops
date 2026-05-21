@@ -22,7 +22,7 @@ export default async function DashboardPage({
   const accessToken = session?.session?.token ?? null;
 
   if (!accessToken){
-    redirect('/login')
+    redirect('/auth/sign-in')
   }
 
 

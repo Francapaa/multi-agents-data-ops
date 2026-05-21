@@ -1,14 +1,14 @@
 from pydantic import BaseModel, Field
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_tavily import TavilySearch
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
 from ..state import AgentState
 
-tavily_tool = TavilySearchResults(max_results=3)
+tavily_tool = TavilySearch(max_results=3)
 llm = llm_connection()
 
 
-class SearchQueries(BaseModel):
+class SearchQueries(BaseModel): 
     queries: list[str] = Field(description="List of 3 optimized queries to Google")
 
 
