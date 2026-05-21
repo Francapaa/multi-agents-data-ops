@@ -1,3 +1,3 @@
-from config.database import db, get_db, Database
+from config.database import Database, get_db
 
-__all__ = ["db", "get_db", "Database"]
+__all__ = ["Database", "get_db"]

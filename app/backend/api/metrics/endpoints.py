@@ -41,6 +41,8 @@ async def metrics_recent_posts(
 ):
     uid = _user_uuid(user)
     rows = await metrics_service.recent_posts_for_user(database, uid, limit=10)
+    if not rows: 
+        return{"posts": None}
     return {"posts": rows}
 
 

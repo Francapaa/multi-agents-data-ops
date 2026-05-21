@@ -174,6 +174,25 @@ async def increment_project_retry_count(
     )
 
 
+async def save_prd_for_project(
+    database: Database,
+    user_id: UUID,
+    project_id: UUID,
+    *,
+    prd: str,
+) -> None:
+    owned = await database.execute_one(
+        "SELECT id FROM projects WHERE id = $1 AND user_id = $2",
+        (project_id, user_id),
+    )
+    if not owned:
+        return
+    await database.execute(
+        "UPDATE projects SET prd = $1 WHERE id = $2 AND user_id = $3",
+        (prd, project_id, user_id),
+    )
+
+
 async def save_post_for_project(
     database: Database,
     user_id: UUID,

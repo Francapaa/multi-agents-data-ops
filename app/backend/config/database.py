@@ -36,8 +36,15 @@ class Database:
                 return dict(zip(columns, row)) if row else None
 
 
-db = Database()
+_db_instance: Database | None = None
+
+
+def get_database() -> Database:
+    global _db_instance
+    if _db_instance is None:
+        _db_instance = Database()
+    return _db_instance
 
 
 async def get_db() -> Database:
-    return db
+    return get_database()

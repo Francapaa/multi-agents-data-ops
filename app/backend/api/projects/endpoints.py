@@ -58,7 +58,7 @@ def _require_user_uuid(user: dict) -> UUID:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
-@router.post("", response_model=ProjectResponse, status_code=201)
+@router.post("/upload", response_model=ProjectResponse, status_code=201)
 async def create_project(
     body: ProjectCreateBody,
     user: dict = Depends(get_current_user),
