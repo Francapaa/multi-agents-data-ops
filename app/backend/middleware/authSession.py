@@ -1,5 +1,4 @@
 import base64
-from urllib.parse import urlparse
 
 import httpx
 import jwt
@@ -13,8 +12,7 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.neon_auth_url = neon_auth_url.rstrip("/")
         self.jwks_url = f"{self.neon_auth_url}/.well-known/jwks.json"
-        parsed = urlparse(self.neon_auth_url)
-        self.expected_origin = f"{parsed.scheme}://{parsed.netloc}"
+        self.expected_origin = self.neon_auth_url.rstrip("/")
         self._jwks_cache: dict | None = None
 
     async def dispatch(self, request: Request, call_next):
@@ -30,6 +28,9 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
                 content={"detail": "Invalid authorization header"},
             )
 
+        print(f"[AUTH] Token received (first 80 chars): {token[:80]}")
+        print(f"[AUTH] Token length: {len(token)}")
+        print(f"[AUTH] Token segments: {token.count('.')}")
         payload = await self.validate_token(token)
         if not payload:
             return JSONResponse(status_code=401, content={"detail": "Invalid token"})
@@ -51,7 +52,8 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
                 audience=self.expected_origin,
             )
             return payload
-        except Exception:
+        except Exception as e:
+            print(f"[AUTH] Token validation error: {e}")
             return None
 
     async def _get_jwks(self) -> dict:

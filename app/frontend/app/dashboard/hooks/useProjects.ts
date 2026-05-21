@@ -40,6 +40,7 @@ export function useProjects(accessToken: string | null): UseProjectsReturn {
       });
 
       if (!response.ok) {
+        console.log(error)
         throw new Error("Failed to fetch projects");
       }
 
