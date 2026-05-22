@@ -14,7 +14,7 @@ export function CreateProjectButton({ onCreateProject }: CreateProjectButtonProp
     if (onCreateProject) {
       onCreateProject();
     } else {
-      router.push("/dashboard/new-project");
+      router.push("/new-project");
     }
   };
 
