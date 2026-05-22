@@ -32,8 +32,11 @@ export function NewProjectChat() {
     setError(null);
 
     try {
-      const { data, error: tokenError } = await authClient.token();
-      if (tokenError || !data?.token) {
+      const { data, error: sessionError } = await authClient.getSession();
+      if (sessionError || !data?.session?.token) {
+        console.log(data)
+        console.log(data?.session?.token)
+        console.log(sessionError);
         setError("No se pudo autenticar");
         setSubmitting(false);
         return;
@@ -45,7 +48,7 @@ export function NewProjectChat() {
 
       const res = await fetch(`${BACKEND_URL}/api/projects/create-from-message`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${data.token}` },
+        headers: { Authorization: `Bearer ${data.session.token}` },
         body: formData,
       });
 
