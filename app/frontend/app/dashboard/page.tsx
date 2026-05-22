@@ -19,9 +19,8 @@ export default async function DashboardPage({
 }) {
   const { data: session } = await auth.getSession();
   const sp = await searchParams;
-  const accessToken = session?.session?.token ?? null;
 
-  if (!accessToken){
+  if (!session?.user){
     redirect('/auth/sign-in')
   }
 
@@ -31,7 +30,7 @@ export default async function DashboardPage({
       <header className="bg-white border-b border-slate-100">
         <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          {session?.user && session?.user.image && (
+          {session?.user?.image && (
             <UserAvatar
               imageUrl={session.user.image}
               name={session.user.name || session.user.email}
@@ -43,7 +42,6 @@ export default async function DashboardPage({
 
       <div className="max-w-4xl mx-auto py-12 px-6">
         <DashboardClient
-          accessToken={accessToken}
           streamProjectId={sp.stream}
         />
 

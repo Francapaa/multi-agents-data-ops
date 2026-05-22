@@ -12,7 +12,7 @@ async def overview_for_user(database: Database, user_id: UUID) -> dict[str, Any]
           COUNT(*) FILTER (WHERE status = 'completed')::bigint AS completed,
           COUNT(*) FILTER (WHERE status = 'failed')::bigint AS failed
         FROM projects
-        WHERE user_id = $1
+        WHERE user_id = %s
         """,
         (user_id,),
     )
@@ -38,7 +38,7 @@ async def costs_for_user(database: Database, user_id: UUID) -> dict[str, Any]:
           COALESCE(SUM(total_output_tokens), 0)::bigint AS output_tokens,
           COALESCE(AVG(execution_time_seconds), 0)::float AS avg_time_seconds
         FROM projects
-        WHERE user_id = $1
+        WHERE user_id = %s
         """,
         (user_id,),
     )
@@ -80,9 +80,9 @@ async def recent_posts_for_user(
           pr.status AS project_status
         FROM posts p
         INNER JOIN projects pr ON pr.id = p.project_id
-        WHERE pr.user_id = $1
+        WHERE pr.user_id = %s
         ORDER BY p.id DESC
-        LIMIT $2
+        LIMIT %s
         """,
         (user_id, limit),
     )
@@ -97,7 +97,7 @@ async def system_health_for_user(database: Database, user_id: UUID) -> dict[str,
           COUNT(*) FILTER (WHERE status = 'failed')::bigint AS failed,
           COALESCE(AVG(retry_count), 0)::float AS avg_retries
         FROM projects
-        WHERE user_id = $1
+        WHERE user_id = %s
           AND status IN ('completed', 'failed')
         """,
         (user_id,),

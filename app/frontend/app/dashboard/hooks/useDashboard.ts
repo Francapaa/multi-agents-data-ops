@@ -7,6 +7,7 @@ import {
   MetricsOverview,
   RecentPostRow,
 } from "../types";
+import { authClient } from "@/lib/auth/client";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -91,19 +92,25 @@ interface UseDashboardReturn {
   refetch: () => void;
 }
 
-export function useDashboard(accessToken: string | null): UseDashboardReturn {
+export function useDashboard(): UseDashboardReturn {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const initialized = useRef(false);
 
   const fetchMetrics = useCallback(async () => {
-    if (!accessToken || !BACKEND_URL) {
+    if (!BACKEND_URL) {
+      dispatch({ type: "LOAD_END" });
+      return;
+    }
+
+    const { data, error } = await authClient.token();
+    if (error || !data?.token) {
       dispatch({ type: "LOAD_END" });
       return;
     }
 
     dispatch({ type: "LOAD_START" });
 
-    const headers = { Authorization: `Bearer ${accessToken}` };
+    const headers = { Authorization: `Bearer ${data.token}` };
 
     const results = await Promise.allSettled([
       fetch(`${BACKEND_URL}/api/metrics/overview`, { headers, cache: "no-store" })
@@ -135,7 +142,7 @@ export function useDashboard(accessToken: string | null): UseDashboardReturn {
         allFailed: Object.keys(partialErrors).length === 4,
       },
     });
-  }, [accessToken]);
+  }, []);
 
   useEffect(() => {
     if (!initialized.current) {

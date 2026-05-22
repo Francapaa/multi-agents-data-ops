@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Project } from "../types";
+import { authClient } from "@/lib/auth/client";
 
 const BACKEND_URL: string | undefined = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -13,20 +14,22 @@ interface UseProjectsReturn {
   refetch: () => void;
 }
 
-export function useProjects(accessToken: string | null): UseProjectsReturn {
+export function useProjects(): UseProjectsReturn {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isInitialized = useRef(false);
 
   const fetchProjects = useCallback(async () => {
-    if (!accessToken) {
-      setIsLoading(false);
-      return;
-    }
     if (!BACKEND_URL){
       console.log("ENVIRONMENT VARIABLE DOESN'T EXIST");
       return; 
+    }
+
+    const { data: tokenData, error: tokenError } = await authClient.token();
+    if (tokenError || !tokenData?.token) {
+      setIsLoading(false);
+      return;
     }
 
     setIsLoading(true);
@@ -35,7 +38,7 @@ export function useProjects(accessToken: string | null): UseProjectsReturn {
     try {
       const response = await fetch(`${BACKEND_URL}/api/projects`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${tokenData.token}`,
         },
       });
 
@@ -43,14 +46,14 @@ export function useProjects(accessToken: string | null): UseProjectsReturn {
         throw new Error("Failed to fetch projects");
       }
 
-      const data = await response.json();
-      setProjects(data.projects || []);
+      const result = await response.json();
+      setProjects(result.projects || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, [accessToken]);
+  }, []);
 
   useEffect(() => {
     if (!isInitialized.current) {

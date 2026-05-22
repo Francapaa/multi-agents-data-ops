@@ -8,12 +8,10 @@ import { ProjectsOverview } from "./ProjectsOverview";
 import { SystemHealth } from "./SystemHealth";
 
 interface DashboardClientProps {
-  accessToken: string | null;
   streamProjectId?: string;
 }
 
 export function DashboardClient({
-  accessToken,
   streamProjectId,
 }: DashboardClientProps) {
   const {
@@ -25,15 +23,7 @@ export function DashboardClient({
     error,
     partialErrors,
     refetch,
-  } = useDashboard(accessToken);
-
-  if (!accessToken) {
-    return (
-      <p className="text-center text-slate-600 py-8">
-        Iniciá sesión para ver el dashboard.
-      </p>
-    );
-  }
+  } = useDashboard();
 
   const hasPartialErrors = Object.keys(partialErrors).length > 0;
 
@@ -65,7 +55,6 @@ export function DashboardClient({
       {streamProjectId ? (
         <ProjectStream
           projectId={streamProjectId}
-          accessToken={accessToken}
           onComplete={refetch}
         />
       ) : null}

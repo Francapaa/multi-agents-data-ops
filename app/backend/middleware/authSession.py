@@ -1,4 +1,5 @@
 import base64
+from urllib.parse import urlparse
 
 import httpx
 import jwt
@@ -12,7 +13,8 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.neon_auth_url = neon_auth_url.rstrip("/")
         self.jwks_url = f"{self.neon_auth_url}/.well-known/jwks.json"
-        self.expected_origin = self.neon_auth_url.rstrip("/")
+        parsed = urlparse(neon_auth_url)
+        self.expected_origin = f"{parsed.scheme}://{parsed.netloc}"
         self._jwks_cache: dict | None = None
 
     async def dispatch(self, request: Request, call_next):

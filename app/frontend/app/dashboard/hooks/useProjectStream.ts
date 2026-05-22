@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { authClient } from "@/lib/auth/client";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -41,7 +42,6 @@ function parseSseBlocks(buffer: string): { events:Event[]; rest: string } {
 
 export function useProjectStream(
   projectId: string | null | undefined,
-  accessToken: string | null,
   onUpdate?: (event: string, payload: unknown) => void,
 ) {
   const [state, setState] = useState<StreamState>({
@@ -55,18 +55,23 @@ export function useProjectStream(
   onUpdateRef.current = onUpdate;
 
   useEffect(() => {
-    if (!projectId || !accessToken || !BACKEND_URL) return;
+    if (!projectId || !BACKEND_URL) return;
 
     const ac = new AbortController();
     abortRef.current = ac;
     let buf = "";
+    let cancelled = false;
 
     (async () => {
+      const { data, error } = await authClient.token();
+      if (cancelled || error || !data?.token) return;
+      const token = data.token;
+
       try {
         const res = await fetch(
           `${BACKEND_URL}/api/projects/${projectId}/stream`,
           {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${token}` },
             signal: ac.signal,
           },
         );
@@ -130,8 +135,8 @@ export function useProjectStream(
       }
     })();
 
-    return () => ac.abort();
-  }, [projectId, accessToken]);
+    return () => { cancelled = true; ac.abort(); };
+  }, [projectId]);
 
   return state;
 }

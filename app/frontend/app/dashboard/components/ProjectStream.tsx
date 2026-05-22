@@ -5,16 +5,14 @@ import { useProjectStream } from "../hooks/useProjectStream";
 
 interface ProjectStreamProps {
   projectId: string | null | undefined;
-  accessToken: string | null;
   onComplete?: () => void;
 }
 
 export function ProjectStream({
   projectId,
-  accessToken,
   onComplete,
 }: ProjectStreamProps) {
-  const state = useProjectStream(projectId, accessToken, (ev) => {
+  const state = useProjectStream(projectId, (ev) => {
     if (ev === "complete") onComplete?.();
   });
 
