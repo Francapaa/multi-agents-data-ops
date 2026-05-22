@@ -1,19 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  MetricsCosts,
-  MetricsHealth,
-  MetricsOverview,
-  RecentPostRow,
-} from "../types";
+import { useDashboard } from "../hooks/useDashboard";
 import { PipelineStats } from "./PipelineStats";
 import { PostsList } from "./PostsList";
 import { ProjectStream } from "./ProjectStream";
 import { ProjectsOverview } from "./ProjectsOverview";
 import { SystemHealth } from "./SystemHealth";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface DashboardClientProps {
   accessToken: string | null;
@@ -24,49 +16,16 @@ export function DashboardClient({
   accessToken,
   streamProjectId,
 }: DashboardClientProps) {
-  const [overview, setOverview] = useState<MetricsOverview | null>(null);
-  const [costs, setCosts] = useState<MetricsCosts | null>(null);
-  const [health, setHealth] = useState<MetricsHealth | null>(null);
-  const [posts, setPosts] = useState<RecentPostRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadMetrics = useCallback(async () => {
-    if (!accessToken || !BACKEND_URL) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const headers = { Authorization: `Bearer ${accessToken}` };
-      const [ov, co, he, rp] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/metrics/overview`, { headers, cache: "no-store" }),
-        fetch(`${BACKEND_URL}/api/metrics/costs`, { headers, cache: "no-store" }),
-        fetch(`${BACKEND_URL}/api/metrics/health`, { headers, cache: "no-store" }),
-        fetch(`${BACKEND_URL}/api/metrics/recent-posts`, {
-          headers,
-          cache: "no-store",
-        }),
-      ]);
-      if (!ov.ok || !co.ok || !he.ok || !rp.ok) {
-        throw new Error("No se pudieron cargar las métricas");
-      }
-      setOverview(await ov.json());
-      setCosts(await co.json());
-      setHealth(await he.json());
-      const recent = await rp.json();
-      setPosts(recent.posts ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken]);
-
-  useEffect(() => {
-    loadMetrics();
-  }, [loadMetrics]);
+  const {
+    overview,
+    costs,
+    health,
+    posts,
+    loading,
+    error,
+    partialErrors,
+    refetch,
+  } = useDashboard(accessToken);
 
   if (!accessToken) {
     return (
@@ -76,10 +35,18 @@ export function DashboardClient({
     );
   }
 
+  const hasPartialErrors = Object.keys(partialErrors).length > 0;
+
   return (
     <div className="space-y-8">
       {error ? (
         <p className="text-sm text-red-600 text-center">{error}</p>
+      ) : null}
+
+      {hasPartialErrors && !error ? (
+        <p className="text-xs text-amber-600 text-center">
+          Algunos datos no pudieron cargarse.
+        </p>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -99,7 +66,7 @@ export function DashboardClient({
         <ProjectStream
           projectId={streamProjectId}
           accessToken={accessToken}
-          onComplete={loadMetrics}
+          onComplete={refetch}
         />
       ) : null}
 
