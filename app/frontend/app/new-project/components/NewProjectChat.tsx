@@ -73,7 +73,7 @@ export function NewProjectChat() {
             ¿What PRD you want to transform?
           </h2>
           <p className="text-slate-500 text-sm mb-8">
-            Add your PRD and we'll transform into a blog post
+            Add your PRD and we will transform it into a blog post
           </p>
         </div>
       </div>

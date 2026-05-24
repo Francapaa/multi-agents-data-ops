@@ -1,12 +1,19 @@
 @import "tailwindcss";
 @import "@neondatabase/auth/ui/tailwind";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --blue-primary: #2563EB;
   --blue-light: #3B82F6;
   --blue-dark: #1D4ED8;
+}
+
+.dark {
+  --background: #030712;
+  --foreground: #f9fafb;
 }
 
 @theme inline {

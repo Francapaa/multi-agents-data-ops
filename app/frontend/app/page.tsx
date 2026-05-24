@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
-import {auth} from '@/lib/auth/server'
-import { redirect } from "next/navigation";
-import { AnimatedContainer, Button } from "@/lib/components/ui";
+import ThemeToggle from "@/lib/components/ui/DarkModeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +36,8 @@ export default async function Home() {
           </div>
         </div>
       </header>
-      <main className="flex-1 flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-100">
+      <main className="min-h-screen bg-white dark:bg-gray-950 text-black dark:text-white transition-colors p-8">
+      <ThemeToggle/>
         <div className="text-center">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
             Multi-Agent DataOps

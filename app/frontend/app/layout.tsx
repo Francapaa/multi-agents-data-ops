@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { NeonAuthUIProvider } from "@neondatabase/auth/react";
 import { authClient } from "@/lib/auth/client";
+import { ThemeProvider } from "./providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,12 +23,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <NeonAuthUIProvider
-          authClient={authClient}
-          social={{ providers: ["google"] }}
-        >
-          {children}
-        </NeonAuthUIProvider>
+        <ThemeProvider>
+          <NeonAuthUIProvider
+            authClient={authClient}
+            social={{ providers: ["google"] }}
+          >
+            {children}
+          </NeonAuthUIProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
