@@ -32,10 +32,13 @@ export function NewProjectChat() {
     setError(null);
 
     try {
-      const { data, error: sessionError } = await authClient.getSession();
-      if (sessionError || !data?.session?.token) {
-        console.log(data)
-        console.log(data?.session?.token)
+      const { data, error: sessionError } = await authClient.token({
+        fetchOptions: {
+          headers: { "X-Force-Fetch": "true" },
+        },
+      });
+      console.log(data?.token); 
+      if (sessionError || !data.token) {
         console.log(sessionError);
         setError("No se pudo autenticar");
         setSubmitting(false);
@@ -46,13 +49,14 @@ export function NewProjectChat() {
       formData.append("message", text);
       if (file) formData.append("file", file);
 
-      const res = await fetch(`${BACKEND_URL}/api/projects/create-from-message`, {
+      const res = await fetch(`${BACKEND_URL}/api/projects/upload`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${data.session.token}` },
+        headers: { Authorization: `Bearer ${data.token}` },
         body: formData,
       });
 
       if (!res.ok) {
+        console.log("ERROR")
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || "Error al crear el proyecto");
       }

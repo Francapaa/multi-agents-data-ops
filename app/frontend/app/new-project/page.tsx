@@ -5,9 +5,10 @@ import { NewProjectChat } from "./components/NewProjectChat";
 export const dynamic = "force-dynamic";
 
 export default async function NewProjectPage() {
-  const { data: session } = await auth.getSession();
+  const { data: session } = await auth.token();
+  console.log(session)
 
-  if (!session?.user) {
+  if (!session?.token) {
     redirect("/auth/sign-in");
   }
 

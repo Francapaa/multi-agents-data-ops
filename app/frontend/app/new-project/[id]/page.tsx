@@ -14,6 +14,7 @@ export default async function ProjectDetailPage({
   const { data: session } = await auth.getSession();
   const { id } = await params;
 
+
   if (!session?.user) {
     redirect("/auth/sign-in");
   }
