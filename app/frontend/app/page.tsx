@@ -1,11 +1,14 @@
+"use client"
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
-import ThemeToggle from "@/lib/components/ui/DarkModeButton";
+const ThemeToggle = dynamic(() => import("@/lib/components/ui/DarkModeButton"), {
+  ssr: false
+}); // estabamos tratando de saber de antemano en base a cookies/localstorage/SO si iba a venir dark o light mode
+    //si viene distinto al que teniamos pensado lanza el error
 
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-
+export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">

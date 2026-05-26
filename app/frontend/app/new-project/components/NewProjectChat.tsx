@@ -73,7 +73,7 @@ export function NewProjectChat() {
     <div className="flex flex-col min-h-[calc(100vh-10rem)]">
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-2xl text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          <h2 className="text-2xl font-bold dark:text-white  text-slate-900 mb-2">
             ¿What PRD you want to transform?
           </h2>
           <p className="text-slate-500 text-sm mb-8">
@@ -82,7 +82,7 @@ export function NewProjectChat() {
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-white/80 backdrop-blur-sm pt-4 pb-6">
+      <div className="sticky bottom-0 bg-white/80 dark:bg-gray-950 backdrop-blur-sm pt-4 pb-6">
         {error && (
           <div className="max-w-2xl mx-auto mb-3 px-5 py-3 bg-red-50 border border-red-200 rounded-xl">
             <p className="text-sm text-red-600">{error}</p>
