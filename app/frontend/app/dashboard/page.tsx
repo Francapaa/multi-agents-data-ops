@@ -26,10 +26,10 @@ export default async function DashboardPage({
 
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
+      <header className="bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
           {session?.user?.image && (
             <UserAvatar
               imageUrl={session.user.image}

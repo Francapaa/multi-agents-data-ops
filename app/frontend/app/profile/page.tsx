@@ -13,8 +13,8 @@ export default async function ProfilePage() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-500">Not authenticated</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-gray-950 flex items-center justify-center">
+        <p className="text-slate-500 dark:text-gray-300">Not authenticated</p>
       </div>
     );
   }
@@ -28,10 +28,10 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
       <div className="max-w-md mx-auto py-12 px-6">
         <BackButton />
-        <h1 className="text-3xl font-bold text-slate-900 mb-8 mt-4">Profile</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 mt-4">Profile</h1>
         <ProfileCard user={user} />
       </div>
     </div>
