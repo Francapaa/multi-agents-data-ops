@@ -2,7 +2,7 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
 from agents.graph import get_compiled_workflow
@@ -19,7 +19,6 @@ NODE_PROGRESS: dict[str, tuple[str, int]] = {
     "polisher": ("polisher", 90),
 }
 
-_running: dict[UUID, asyncio.Task[None]] = {}
 _STREAM_DONE = object()
 
 
@@ -53,15 +52,17 @@ async def run_pipeline(
     database: Database,
     user_id: UUID,
     project_id: UUID,
+    publish: Optional[callable] = None,
 ) -> None:
+    if publish is None:
+        publish = lambda e, d: stream_hub.publish(project_id, e, d)
+
     start = time.monotonic()
     full_state: dict[str, Any] = {}
     try:
         row = await projects_service.get_project_owned(database, user_id, project_id)
         if not row:
-            await stream_hub.publish(
-                project_id, "error", {"detail": "Project not found"}
-            )
+            await publish("error", {"detail": "Project not found"})
             return
 
         prd = (row.get("prd") or "").strip()
@@ -72,9 +73,7 @@ async def run_pipeline(
                 project_id,
                 status="failed",
             )
-            await stream_hub.publish(
-                project_id, "error", {"detail": "Project has no PRD"}
-            )
+            await publish("error", {"detail": "Project has no PRD"})
             return
 
         await projects_service.patch_project_metrics(
@@ -102,11 +101,7 @@ async def run_pipeline(
 
                 if node_name in NODE_PROGRESS:
                     status_key, progress = NODE_PROGRESS[node_name]
-                    await stream_hub.publish(
-                        project_id,
-                        "status",
-                        {"status": status_key, "progress": progress},
-                    )
+                    await publish("status", {"status": status_key, "progress": progress})
 
                 if node_name == "fast_checker":
                     fc = full_state.get("fastChecker") or {}
@@ -151,8 +146,7 @@ async def run_pipeline(
                 execution_time_seconds=elapsed,
                 status="completed",
             )
-            await stream_hub.publish(
-                project_id,
+            await publish(
                 "complete",
                 {
                     "total_input_tokens": tin,
@@ -170,8 +164,7 @@ async def run_pipeline(
                 execution_time_seconds=elapsed,
                 status="failed",
             )
-            await stream_hub.publish(
-                project_id,
+            await publish(
                 "error",
                 {"detail": "Pipeline finished without a polished post"},
             )
@@ -192,19 +185,4 @@ async def run_pipeline(
             )
         except Exception:
             logger.exception("Failed to persist failed status")
-        await stream_hub.publish(
-            project_id, "error", {"detail": str(exc)}
-        )
-    finally:
-        _running.pop(project_id, None)
-
-
-def ensure_pipeline_task(
-    database: Database, user_id: UUID, project_id: UUID
-) -> asyncio.Task[None]:
-    existing = _running.get(project_id)
-    if existing and not existing.done():
-        return existing
-    task = asyncio.create_task(run_pipeline(database, user_id, project_id))
-    _running[project_id] = task
-    return task
+        await publish("error", {"detail": str(exc)})

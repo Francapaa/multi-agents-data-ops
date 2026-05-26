@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+from typing import Optional
 from uuid import UUID
 
 from config.celery_app import celery_app
@@ -11,54 +12,70 @@ from services.file_parser import FileTooLargeError, UnsupportedFormatError, pars
 
 logger = logging.getLogger(__name__)
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+REDIS_URL = os.getenv("REDIS_URL")
 
 
-def _pub_sync(project_id: str, event: str, data: dict):
-    import redis as sync_redis
+async def _pub_async(project_id: str, event: str, data: dict) -> None:
+    import redis.asyncio as aioredis
 
     try:
-        r = sync_redis.from_url(REDIS_URL)
-        r.publish(f"project:{project_id}", json.dumps({"event": event, "data": data}))
-        r.close()
+        r = aioredis.from_url(REDIS_URL)
+        await r.publish(
+            f"project:{project_id}",
+            json.dumps({"event": event, "data": data}),
+        )
+        await r.close()
     except Exception:
         logger.exception("Redis publish failed (non-fatal)")
 
 
 @celery_app.task(bind=True, max_retries=3, default_retry_delay=10, name="process_project")
-def process_project(self, project_id: str, user_id: str, file_bytes: list, filename: str):
+def process_project(
+    self,
+    project_id: str,
+    user_id: str,
+    file_bytes: Optional[list] = None,
+    filename: Optional[str] = None,
+):
     from services.pipeline_runner import run_pipeline
 
     db = Database()
     uid = UUID(user_id)
     pid = UUID(project_id)
 
-    _pub_sync(project_id, "status", {"status": "parsing", "progress": 5, "message": "Recibiendo archivo..."})
+    def _publish(event: str, data: dict):
+        asyncio.run(_pub_async(project_id, event, data))
 
-    try:
-        raw = bytes(file_bytes)
-        text = parse_file(raw, filename)
-    except (UnsupportedFormatError, FileTooLargeError) as exc:
-        _pub_sync(project_id, "error", {"detail": str(exc)})
-        asyncio.run(
-            projects_service.patch_project_metrics(db, uid, pid, status="failed")
-        )
-        return {"status": "failed", "project_id": project_id, "error": str(exc)}
+    _publish("status", {"status": "parsing", "progress": 5, "message": "Recibiendo archivo..."})
 
-    _pub_sync(project_id, "status", {"status": "parsing", "progress": 80, "message": "Guardando PRD en base de datos..."})
+    if file_bytes is not None:
+        try:
+            raw = bytes(file_bytes)
+            file_text = parse_file(raw, filename or "documento")
+        except (UnsupportedFormatError, FileTooLargeError) as exc:
+            _publish("error", {"detail": str(exc)})
+            asyncio.run(
+                projects_service.patch_project_metrics(db, uid, pid, status="failed")
+            )
+            return {"status": "failed", "project_id": project_id, "error": str(exc)}
 
-    asyncio.run(
-        projects_service.save_prd_for_project(db, uid, pid, prd=text)
-    )
+        row = asyncio.run(projects_service.get_project_owned(db, uid, pid))
+        current_prd = (row.get("prd") or "").strip() if row else ""
+        combined = f"{current_prd}\n\n{file_text}" if current_prd else file_text
+
+        asyncio.run(projects_service.save_prd_for_project(db, uid, pid, prd=combined))
+        _publish("status", {"status": "parsing", "progress": 80, "message": "Guardando PRD en base de datos..."})
 
     asyncio.run(
         projects_service.patch_project_metrics(db, uid, pid, status="running", execution_time_seconds=0)
     )
 
-    _pub_sync(project_id, "status", {"status": "parsing", "progress": 100, "message": "PRD listo, iniciando agentes..."})
+    _publish("status", {"status": "parsing", "progress": 100, "message": "PRD listo, iniciando agentes..."})
 
     try:
-        asyncio.run(run_pipeline(db, uid, pid))
+        asyncio.run(
+            run_pipeline(db, uid, pid, publish=lambda e, d: _pub_async(project_id, e, d))
+        )
     except Exception as exc:
         logger.exception("Pipeline failed for project %s", project_id)
         raise self.retry(exc=exc)

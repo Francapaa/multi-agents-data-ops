@@ -19,7 +19,7 @@ async def _fetch_first_post_for_project(
         """
         SELECT id, final_post, failed_facts
         FROM posts
-        WHERE project_id = $1
+        WHERE project_id = %s
         LIMIT 1
         """,
         (project_id,),
@@ -56,7 +56,7 @@ async def list_projects_for_user(database: Database, user_id: UUID) -> list[dict
           id, title, status, created_at,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
-        WHERE user_id = $1
+        WHERE user_id = %s
         ORDER BY created_at DESC
         """,
         (user_id,),
@@ -78,7 +78,7 @@ async def get_project_for_user(
           id, title, status, created_at,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
-        WHERE id = $1 AND user_id = $2
+        WHERE id = %s AND user_id = %s
         """,
         (project_id, user_id),
     )
@@ -101,7 +101,7 @@ async def get_project_owned(
           id, user_id, title, prd, status, created_at,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
-        WHERE id = $1 AND user_id = $2
+        WHERE id = %s AND user_id = %s
         """,
         (project_id, user_id),
     )
@@ -118,7 +118,7 @@ async def create_project(
     await database.execute(
         """
         INSERT INTO projects (id, user_id, title, prd, status)
-        VALUES ($1, $2, $3, $4, 'pending')
+        VALUES (%s, %s, %s, %s, 'pending')
         """,
         (new_id, user_id, title, prd),
     )
@@ -142,12 +142,12 @@ async def patch_project_metrics(
     await database.execute(
         """
         UPDATE projects SET
-          total_input_tokens = COALESCE($1, total_input_tokens),
-          total_output_tokens = COALESCE($2, total_output_tokens),
-          execution_time_seconds = COALESCE($3, execution_time_seconds),
-          retry_count = COALESCE($4, retry_count),
-          status = COALESCE($5, status)
-        WHERE id = $6 AND user_id = $7
+          total_input_tokens = COALESCE(%s, total_input_tokens),
+          total_output_tokens = COALESCE(%s, total_output_tokens),
+          execution_time_seconds = COALESCE(%s, execution_time_seconds),
+          retry_count = COALESCE(%s, retry_count),
+          status = COALESCE(%s, status)
+        WHERE id = %s AND user_id = %s
         """,
         (
             input_tokens,
@@ -168,7 +168,7 @@ async def increment_project_retry_count(
         """
         UPDATE projects
         SET retry_count = retry_count + 1
-        WHERE id = $1 AND user_id = $2
+        WHERE id = %s AND user_id = %s
         """,
         (project_id, user_id),
     )
@@ -182,13 +182,13 @@ async def save_prd_for_project(
     prd: str,
 ) -> None:
     owned = await database.execute_one(
-        "SELECT id FROM projects WHERE id = $1 AND user_id = $2",
+        "SELECT id FROM projects WHERE id = %s AND user_id = %s",
         (project_id, user_id),
     )
     if not owned:
         return
     await database.execute(
-        "UPDATE projects SET prd = $1 WHERE id = $2 AND user_id = $3",
+        "UPDATE projects SET prd = %s WHERE id = %s AND user_id = %s",
         (prd, project_id, user_id),
     )
 
@@ -202,31 +202,31 @@ async def save_post_for_project(
     failed_facts: list[str] | None,
 ) -> None:
     owned = await database.execute_one(
-        "SELECT id FROM projects WHERE id = $1 AND user_id = $2",
+        "SELECT id FROM projects WHERE id = %s AND user_id = %s",
         (project_id, user_id),
     )
     if not owned:
         return
 
     existing = await database.execute_one(
-        "SELECT id FROM posts WHERE project_id = $1 LIMIT 1",
+        "SELECT id FROM posts WHERE project_id = %s LIMIT 1",
         (project_id,),
     )
     facts = failed_facts or []
     if existing:
-        await database.execute(
-            """
-            UPDATE posts
-            SET final_post = $2, failed_facts = $3
-            WHERE id = $1
-            """,
-            (existing["id"], final_post, Json(facts)),
-        )
+            await database.execute(
+                """
+                UPDATE posts
+                SET final_post = %s, failed_facts = %s
+                WHERE id = %s
+                """,
+                (final_post, Json(facts), existing["id"]),
+            )
     else:
         await database.execute(
             """
             INSERT INTO posts (id, project_id, final_post, failed_facts)
-            VALUES (gen_random_uuid(), $1, $2, $3)
+            VALUES (gen_random_uuid(), %s, %s, %s)
             """,
             (project_id, final_post, Json(facts)),
         )

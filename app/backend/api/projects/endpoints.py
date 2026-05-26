@@ -1,19 +1,26 @@
 import asyncio
 import json
+import logging
+import os
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 
 from config.database import Database, get_db
 from dependencies import get_current_user, get_user_id_from_payload
 from services import projects as projects_service
-from services.pipeline_runner import ensure_pipeline_task
 from services.stream_hub import stream_hub
+from tasks.pipeline import process_project
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
+
+REDIS_URL = os.getenv("REDIS_URL")
 
 
 class ProjectPostResponse(BaseModel):
@@ -38,11 +45,6 @@ class ProjectListResponse(BaseModel):
     projects: list[ProjectResponse]
 
 
-class ProjectCreateBody(BaseModel):
-    title: str = Field(..., min_length=1, max_length=500)
-    prd: str = Field(..., min_length=1)
-
-
 class ProjectPatchBody(BaseModel):
     input_tokens: Optional[int] = None
     output_tokens: Optional[int] = None
@@ -58,20 +60,43 @@ def _require_user_uuid(user: dict) -> UUID:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
+def _extract_title(message: str) -> str:
+    message = message.strip()
+    for sep in (". ", ".\n", "\n", "! ", "? "):
+        idx = message.find(sep)
+        if 0 < idx < 200:
+            return message[: idx + 1].strip()
+    return message[:200].strip()
+
+
 @router.post("/upload", response_model=ProjectResponse, status_code=201)
 async def create_project(
-    body: ProjectCreateBody,
+    message: str = Form(...),
+    file: Optional[UploadFile] = File(None),
     user: dict = Depends(get_current_user),
     database: Database = Depends(get_db),
 ):
     """Create a project in pending state (ready for pipeline + SSE)."""
     user_id = _require_user_uuid(user)
+    title = _extract_title(message)
+    print("TITULO DEL NUEVO PROYECTO: ", title)
     payload = await projects_service.create_project(
         database,
         user_id,
-        title=body.title.strip(),
-        prd=body.prd.strip(),
+        title=title,
+        prd=message.strip(),
     )
+
+    project_id = str(payload["id"])
+    user_id_str = str(user_id)
+
+    #depends on the input we passed or not the file
+    if file:
+        file_bytes = await file.read()
+        process_project.delay(project_id, user_id_str, list(file_bytes), file.filename)
+    else:
+        process_project.delay(project_id, user_id_str)
+
     return ProjectResponse(**payload)
 
 
@@ -129,6 +154,23 @@ async def patch_project(
     return ProjectResponse(**payload)
 
 
+async def _redis_bridge(project_id: str, queue: asyncio.Queue) -> None:
+    import redis.asyncio as aioredis
+
+    try:
+        r = aioredis.from_url(REDIS_URL)
+        async with r.pubsub() as pubsub:
+            await pubsub.subscribe(f"project:{project_id}")
+            async for msg in pubsub.listen():
+                if msg["type"] == "message":
+                    data = json.loads(msg["data"])
+                    await queue.put((data["event"], data["data"]))
+    except asyncio.CancelledError:
+        pass
+    except Exception:
+        logger.exception("Redis bridge failed for project %s", project_id)
+
+
 @router.get("/{project_id}/stream")
 async def stream_project(
     project_id: UUID,
@@ -143,7 +185,9 @@ async def stream_project(
 
     async def event_generator():
         queue = await stream_hub.subscribe(project_id)
-        ensure_pipeline_task(database, user_id, project_id)
+        bridge_task = asyncio.create_task(
+            _redis_bridge(str(project_id), queue)
+        )
         try:
             while True:
                 try:
@@ -154,6 +198,7 @@ async def stream_project(
                 except asyncio.TimeoutError:
                     yield ": ping\n\n"
         finally:
+            bridge_task.cancel()
             await stream_hub.unsubscribe(project_id, queue)
 
     return StreamingResponse(
