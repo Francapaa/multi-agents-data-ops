@@ -1,5 +1,6 @@
-from nt import error
 import os
+
+from nt import error
 from dotenv import load_dotenv
 
 load_dotenv()
