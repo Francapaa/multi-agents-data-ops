@@ -22,7 +22,9 @@ class Database:
         async with self.connect() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(query, params)
-                columns = [desc[0] for desc in cur.description] if cur.description else []
+                if cur.description is None:
+                    return []
+                columns = [desc[0] for desc in cur.description]
                 rows = await cur.fetchall()
                 return [dict(zip(columns, row)) for row in rows]
 
@@ -31,7 +33,9 @@ class Database:
         async with self.connect() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(query, params)
-                columns = [desc[0] for desc in cur.description] if cur.description else []
+                if cur.description is None:
+                    return None
+                columns = [desc[0] for desc in cur.description]
                 row = await cur.fetchone()
                 return dict(zip(columns, row)) if row else None
 
