@@ -36,6 +36,7 @@ def researcher_node(state: AgentState):
     raw_out = structured_llm.invoke(
         f"Analyze this PRD and generate 3 precise searches to collect technical data:{prd_content} "
     )
+
     if isinstance(raw_out, dict) and "parsed" in raw_out:
         search_input = raw_out["parsed"]
         raw_msg = raw_out.get("raw")
@@ -49,8 +50,20 @@ def researcher_node(state: AgentState):
 
     for q in search_input.queries:
         result = tavily_tool.invoke(q)
-        all_facts.extend([r["content"] for r in result])
-        all_sources.extend([r["url"] for r in result])
+        results_list = result.get("results", [])
+        if not results_list:
+            return {
+            "researcher": {
+                "search_queries": [],
+                "sources": [],
+                "facts": [],
+                "context": "Research skipped: LLM with no results list.",
+            },
+            "current_agent": state.get("current_agent"),
+            **merge_usage(dict(state), usage_delta),
+        }
+        all_facts.extend([r["content"] for r in results_list])
+        all_sources.extend([r["url"] for r in results_list])
 
     metrics = merge_usage(dict(state), usage_delta)
     return {
