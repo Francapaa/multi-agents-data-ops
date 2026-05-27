@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
 from ..state import AgentState
-from ..validators.workflow_validations import CHECKER_CONFIDENCE_THRESHOLD
+from ..validators.workflow_validations import CHECKER_CONFIDENCE_THRESHOLD # 0.6
 
 
 class CheckerOutput(BaseModel):
@@ -29,6 +29,12 @@ def checker_node(state: AgentState):
     writer_blob = state.get("writer") or {}
     facts = [f.strip() for f in (researcher_blob.get("facts") or []) if f and f.strip()]
     draft: str = (writer_blob.get("draft") or "").strip()
+
+    print("DENTRO DEL NODO CHECKER")
+    print("RESEARCHER: ", researcher_blob)
+    print("WRITER AGENT: ", writer_blob)
+    print("DATOS REALES QUE TRAE EL RESEARCHER: ", facts)
+    print("DRAFT GENERADO POR WRITER AGENT: ", draft)
 
     base_fast = {
         "verified": False,
@@ -80,7 +86,8 @@ def checker_node(state: AgentState):
 
     confidence = float(result.confidence)
     requested = confidence < CHECKER_CONFIDENCE_THRESHOLD
-
+    print("CONFIANZA GENERADA POR EL CHECKER: ", confidence)
+    
     print(result)
     metrics = merge_usage(dict(state), usage_delta)
     return {

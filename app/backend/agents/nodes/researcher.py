@@ -54,7 +54,7 @@ def researcher_node(state: AgentState):
         if not results_list:
             return {
             "researcher": {
-                "search_queries": [],
+                "search_queries": search_input.queries,   
                 "sources": [],
                 "facts": [],
                 "context": "Research skipped: LLM with no results list.",

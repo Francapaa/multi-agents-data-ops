@@ -25,10 +25,11 @@ def route_after_writer(state: AgentState):
     draft = writer_blob.get("draft") or ""
     attempts = quantity_of_retry(writer_blob)
 
+    if attempts >= WRITER_RETRY_LIMIT:
+        return END # si primero estaba el otro if se queda en loop infinito y nunca
+                   # tiraba error 
     if not is_writer_draft_too_short(draft):
         return "fast_checker"
-    if attempts >= WRITER_RETRY_LIMIT:
-        return END
     return "writer"
 
 
