@@ -38,7 +38,7 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
             return JSONResponse(status_code=401, content={"detail": "Invalid token"})
 
         request.state.user = payload
-
+        print(payload)
         return await call_next(request)
 
     async def validate_token(self, token: str) -> dict | None:

@@ -18,8 +18,9 @@ class FileTooLargeError(ValueError):
 
 def parse_file(file_bytes: bytes, filename: str) -> str:
     ext = os.path.splitext(filename)[1].lower()
-
+    print("HOLA PARSE_FILE")
     if ext not in SUPPORTED_EXTENSIONS:
+        print("esta entrando aca", ext)
         raise UnsupportedFormatError(
             f"Unsupported file format '{ext}'. Supported: {', '.join(SUPPORTED_EXTENSIONS)}"
         )

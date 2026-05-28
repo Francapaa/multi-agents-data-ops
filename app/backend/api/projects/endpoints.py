@@ -60,7 +60,7 @@ def _require_user_uuid(user: dict) -> UUID:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
 
-def _extract_title(message: str) -> str:
+def _extract_title(message: str) -> str: # esto solo funciona por ahora si es un texto, no si es pdf o word
     message = message.strip()
     for sep in (". ", ".\n", "\n", "! ", "? "):
         idx = message.find(sep)
@@ -71,12 +71,18 @@ def _extract_title(message: str) -> str:
 
 @router.post("/upload", response_model=ProjectResponse, status_code=201)
 async def create_project(
-    message: str = Form(...),
+    message: Optional[str] = Form(None), #tambien none porque puede venir solo el file
     file: Optional[UploadFile] = File(None),
     user: dict = Depends(get_current_user),
     database: Database = Depends(get_db),
 ):
+
     """Create a project in pending state (ready for pipeline + SSE)."""
+    print("MENSAJE RECIBIDO DEL FRONTEND: ",message)
+    print("FILE RECIBIDO DEL FRONTEND: ", file)
+    print("USER RECIBIDO DEL FRONTEND: ", user)
+    print("DATABASE ACTUAL: ", database)
+
     user_id = _require_user_uuid(user)
     title = _extract_title(message)
     print("TITULO DEL NUEVO PROYECTO: ", title)
@@ -92,6 +98,7 @@ async def create_project(
 
     #depends on the input we passed or not the file
     if file:
+        print(file)
         file_bytes = await file.read()
         process_project.delay(project_id, user_id_str, list(file_bytes), file.filename)
     else:
