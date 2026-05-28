@@ -84,13 +84,18 @@ async def create_project(
     print("DATABASE ACTUAL: ", database)
 
     user_id = _require_user_uuid(user)
-    title = _extract_title(message)
+    if message:
+        title = _extract_title(message)
+    elif file:
+        title = "PRD "+ file.filename
+    else:
+        title = "Nuevo proyecto sin titulo"
     print("TITULO DEL NUEVO PROYECTO: ", title)
     payload = await projects_service.create_project(
         database,
         user_id,
         title=title,
-        prd=message.strip(),
+        prd=(message or "").strip(),
     )
 
     project_id = str(payload["id"])

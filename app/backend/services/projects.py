@@ -184,7 +184,7 @@ async def save_prd_for_project(
     owned = await database.execute_one(
         "SELECT id FROM projects WHERE id = %s AND user_id = %s",
         (project_id, user_id),
-    )
+)  
     if not owned:
         return
     await database.execute(
