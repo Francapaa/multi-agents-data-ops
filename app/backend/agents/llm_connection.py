@@ -17,7 +17,6 @@ def llm_connection() -> ChatGoogleGenerativeAI | None:
         model="gemini-2.5-flash",
         google_api_key=api_key,
         temperature=0.1,  # Low to better precision 
-        api_version="v1" #nos esta dando problemas, no se porque ejecuta llamadas a la version BETA de gemini
     )
     return llm
 
