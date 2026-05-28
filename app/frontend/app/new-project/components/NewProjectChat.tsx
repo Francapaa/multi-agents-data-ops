@@ -48,17 +48,18 @@ export function NewProjectChat() {
       const formData = new FormData();
       formData.append("message", text);
       if (file) formData.append("file", file);
-
+      console.log(file) // pdf is actually working
       const res = await fetch(`${BACKEND_URL}/api/projects/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${data.token}` },
         body: formData,
       });
 
+      console.log(formData)
       if (!res.ok) {
         console.log("ERROR")
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || "Error al crear el proyecto");
+        throw new Error("Error al crear el proyecto");
       }
 
       const project = await res.json();
