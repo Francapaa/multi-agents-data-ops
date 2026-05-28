@@ -220,7 +220,7 @@ async def save_post_for_project(
                 SET final_post = %s, failed_facts = %s
                 WHERE id = %s
                 """,
-                (final_post, Json(facts), existing["id"]),
+                (final_post, facts, existing["id"]),
             )
     else:
         await database.execute(
@@ -228,5 +228,5 @@ async def save_post_for_project(
             INSERT INTO posts (id, project_id, final_post, failed_facts)
             VALUES (gen_random_uuid(), %s, %s, %s)
             """,
-            (project_id, final_post, Json(facts)),
+            (project_id, final_post, facts),
         )
