@@ -1,8 +1,6 @@
 import asyncio
-import json
 import logging
 import sys
-import os
 from typing import Optional
 from uuid import UUID
 
@@ -10,28 +8,13 @@ from config.celery_app import celery_app
 from config.database import Database
 from services import projects as projects_service
 from services.file_parser import FileTooLargeError, UnsupportedFormatError, parse_file
+from services.redis_client import publish_event
 
 
 # we force to use SelectorEventLoop compatible with psycopg
 
 
 logger = logging.getLogger(__name__)
-
-REDIS_URL = os.getenv("REDIS_URL")
-
-
-async def _pub_async(project_id: str, event: str, data: dict) -> None:
-    import redis.asyncio as aioredis
-
-    try:
-        r = aioredis.from_url(REDIS_URL)
-        await r.publish(
-            f"project:{project_id}",
-            json.dumps({"event": event, "data": data}),
-        )
-        await r.close()
-    except Exception:
-        logger.exception("Redis publish failed (non-fatal)")
 
 
 @celery_app.task(bind=True, max_retries=3, default_retry_delay=10, name="process_project")
@@ -51,7 +34,8 @@ def process_project(
 
         print("PROYECTO CON ID: ", pid)
         async def _publish(event: str, data: dict):
-            await _pub_async(project_id, event, data)
+            logger.info("Publishing event: project=%s event=%s", project_id, event)
+            await publish_event(project_id, event, data)
 
         await _publish("status", {"status": "parsing", "progress": 5, "message": "Recibiendo archivo..."})
 
@@ -76,7 +60,7 @@ def process_project(
 
         try:
             print("SE INICIALIZARÁ EL PIPELINE")
-            await run_pipeline(db, uid, pid, publish=lambda e, d: _pub_async(project_id, e, d))
+            await run_pipeline(db, uid, pid, publish=lambda e, d: publish_event(project_id, e, d))
             print("EJECUTANDO EL PIPELINE DE AGENTES")
         except Exception as exc:
             logger.exception("Pipeline failed for project %s", project_id)

@@ -63,25 +63,34 @@ export function useProjectStream(
     let cancelled = false;
 
     (async () => {
+      console.log("[SSE] Fetching auth token...");
       const { data, error } = await authClient.token();
-      if (cancelled || error || !data?.token) return;
+      if (error) console.error("[SSE] authClient.token() error:", error);
+      if (!data?.token) console.warn("[SSE] No token returned, data:", data);
+      if (cancelled || error || !data?.token) {
+        setState((s) => ({ ...s, error: "Authentication failed — no token" }));
+        return;
+      }
       const token = data.token;
+      console.log("[SSE] Token obtained, connecting to stream...");
 
       try {
-        const res = await fetch(
-          `${BACKEND_URL}/api/projects/${projectId}/stream`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: ac.signal,
-          },
-        );
+        const url = `${BACKEND_URL}/api/projects/${projectId}/stream`;
+        console.log("[SSE] Fetching:", url);
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: ac.signal,
+        });
+        console.log("[SSE] Response status:", res.status, res.statusText);
         if (!res.ok || !res.body) {
+          console.error("[SSE] Stream failed with status:", res.status);
           setState((s) => ({
             ...s,
             error: `Stream failed (${res.status})`,
           }));
           return;
         }
+        console.log("[SSE] Connected, reading stream...");
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let finished = false
@@ -92,6 +101,7 @@ export function useProjectStream(
           const { events, rest } = parseSseBlocks(buf);
           buf = rest;
           for (const { event, data } of events) {
+            console.log("[SSE] Event received:", event, data.slice(0, 120));
             let payload: unknown = data;
             try {
               payload = JSON.parse(data);
@@ -127,7 +137,11 @@ export function useProjectStream(
           }
         }
       } catch (e) {
-        if ((e as Error).name === "AbortError") return;
+        if ((e as Error).name === "AbortError") {
+          console.log("[SSE] Aborted");
+          return;
+        }
+        console.error("[SSE] Fetch error:", e);
         setState((s) => ({
           ...s,
           error: e instanceof Error ? e.message : "Stream error",

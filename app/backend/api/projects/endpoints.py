@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import os
 from typing import Optional
 from uuid import UUID
 
@@ -13,14 +12,11 @@ from pydantic import BaseModel
 from config.database import Database, get_db
 from dependencies import get_current_user, get_user_id_from_payload
 from services import projects as projects_service
-from services.stream_hub import stream_hub
 from tasks.pipeline import process_project
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
-
-REDIS_URL = os.getenv("REDIS_URL")
 
 
 class ProjectPostResponse(BaseModel):
@@ -166,21 +162,33 @@ async def patch_project(
     return ProjectResponse(**payload)
 
 
-async def _redis_bridge(project_id: str, queue: asyncio.Queue) -> None:
-    import redis.asyncio as aioredis
+async def _stream_bridge(project_id: str, queue: asyncio.Queue) -> None:
+    """Read events from Redis Stream and push them into the in-memory queue."""
+    from services.redis_client import STREAM_KEY, get_redis
 
+    stream_key = STREAM_KEY % project_id
     try:
-        r = aioredis.from_url(REDIS_URL)
-        async with r.pubsub() as pubsub:
-            await pubsub.subscribe(f"project:{project_id}")
-            async for msg in pubsub.listen():
-                if msg["type"] == "message":
-                    data = json.loads(msg["data"])
-                    await queue.put((data["event"], data["data"]))
+        r = await get_redis()
+        last_id = "0"
+        while True:
+            results = await r.xread(
+                {stream_key: last_id}, count=10, block=30000
+            )
+            if results:
+                for _stream_name, messages in results:
+                    for msg_id, msg_data in messages:
+                        event = msg_data.get("event", "message")
+                        raw_data = msg_data.get("data", "{}")
+                        try:
+                            data = json.loads(raw_data)
+                        except (json.JSONDecodeError, TypeError):
+                            data = raw_data
+                        await queue.put((event, data))
+                        last_id = msg_id
     except asyncio.CancelledError:
         pass
     except Exception:
-        logger.exception("Redis bridge failed for project %s", project_id)
+        logger.exception("Redis stream bridge failed for project %s", project_id)
 
 
 @router.get("/{project_id}/stream")
@@ -196,14 +204,15 @@ async def stream_project(
         raise HTTPException(status_code=404, detail="Project not found")
 
     async def event_generator():
-        queue = await stream_hub.subscribe(project_id)
+        queue: asyncio.Queue[tuple[str, dict]] = asyncio.Queue()
         bridge_task = asyncio.create_task(
-            _redis_bridge(str(project_id), queue)
+            _stream_bridge(str(project_id), queue)
         )
         try:
             while True:
                 try:
                     event, data = await asyncio.wait_for(queue.get(), timeout=30.0)
+                    logger.info("SSE send: project=%s event=%s", project_id, event)
                     yield f"event: {event}\ndata: {json.dumps(data)}\n\n"
                     if event in ("complete", "error"):
                         break
@@ -211,7 +220,6 @@ async def stream_project(
                     yield ": ping\n\n"
         finally:
             bridge_task.cancel()
-            await stream_hub.unsubscribe(project_id, queue)
 
     return StreamingResponse(
         event_generator(),
