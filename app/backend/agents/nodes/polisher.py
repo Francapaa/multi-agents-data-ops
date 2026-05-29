@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
+from ..prompts import build_polisher_prompt
 from ..state import AgentState
 from ..validators import postprocess_polished_output, validate_polished_output
 
@@ -52,20 +53,9 @@ def polisher_node(state: AgentState):
         "\n".join(f"- {fact}" for fact in failed_facts) if failed_facts else "- (None)"
     )
 
-    prompt = (
-        "You are a senior technical editor.\n"
-        "Rewrite and polish the WRITER DRAFT for clarity, flow, and consistency.\n"
-        "Keep the language in English.\n"
-        "Do not invent claims beyond PRD + RESEARCH FACTS.\n"
-        "If FAILED FACTS are listed, correct or remove related unsupported statements.\n"
-        "Return only the final polished content.\n\n"
-        f"## PRD\n{prd}\n\n"
-        f"## RESEARCH FACTS\n{facts_block}\n\n"
-        f"## FAILED FACTS TO FIX\n{failed_facts_block}\n\n"
-        f"## WRITER DRAFT\n{draft}"
+    raw_out = structured_llm.invoke(
+        build_polisher_prompt(prd, facts_block, failed_facts_block, draft) #prompt
     )
-
-    raw_out = structured_llm.invoke(prompt)
     usage_delta = {"input": 0, "output": 0}
     if isinstance(raw_out, dict) and "parsed" in raw_out:
         result = raw_out["parsed"]

@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
+from ..prompts import build_checker_prompt
 from ..state import AgentState
-from ..validators.workflow_validations import CHECKER_CONFIDENCE_THRESHOLD # 0.6
+from ..validators.workflow_validations import CHECKER_CONFIDENCE_THRESHOLD
 
 
 class CheckerOutput(BaseModel):
@@ -65,18 +66,8 @@ def checker_node(state: AgentState):
         }
 
     facts_block = "\n".join(f"- {fact}" for fact in facts)
-    checker_prompt = (
-        "You are a strict factual checker.\n"
-        "Compare the WRITER DRAFT against the RESEARCH FACTS.\n"
-        "Mark verified=True only if the draft does not contradict facts and covers them accurately.\n"
-        "For failed_facts, include only facts that are contradicted, missing, or meaningfully distorted.\n"
-        "Set confidence as a float in [0,1]. Use >=0.9 only when evidence is clearly strong and consistent.\n"
-        "Be concise and evidence-based. DO NOT INVENT FACTS.\n\n"
-        f"## RESEARCH FACTS\n{facts_block}\n\n"
-        f"## WRITER DRAFT\n{draft}"
-    )
 
-    raw_out = structured_llm.invoke(checker_prompt)
+    raw_out = structured_llm.invoke(build_checker_prompt(facts_block, draft)) #prompt
     usage_delta = {"input": 0, "output": 0}
     if isinstance(raw_out, dict) and "parsed" in raw_out:
         result = raw_out["parsed"]

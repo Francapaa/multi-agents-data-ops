@@ -1,6 +1,7 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
+from ..prompts import WRITER_SYSTEM_PROMPT
 from ..state import AgentState
 
 llm = llm_connection()
@@ -33,9 +34,10 @@ def writer_node(state: AgentState):
         messages = [
             SystemMessage(
                 content=(
-                    "Expert technical writer. Rewrite the draft in Spanish using checker feedback. "
-                    "Correct or remove unsupported claims listed in FAILED FACTS. "
-                    "Keep the output complete, structured, and grounded in PRD+facts only."
+                    f"{WRITER_SYSTEM_PROMPT}\n\n" #prompt if failed facts
+                    "The previous version had factual issues. Rewrite the draft fixing the "
+                    "failed facts listed below. Correct or remove unsupported claims. "
+                    "Keep the blog post format and non-technical tone."
                 ),
             ),
             HumanMessage(
@@ -52,11 +54,7 @@ def writer_node(state: AgentState):
     else:
         messages = [
             SystemMessage(
-                content=(
-                    "Expert technical writer. Output a complete, structured draft in English, "
-                    "faithful to the PRD and grounded in the supplied research facts. "
-                    "Do not add claims beyond PRD+facts."
-                ),
+                content=WRITER_SYSTEM_PROMPT, #prompt is not failedfacts
             ),
             HumanMessage(
                 content=(

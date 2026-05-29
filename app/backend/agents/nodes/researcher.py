@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from langchain_tavily import TavilySearch
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
+from ..prompts import build_researcher_prompt
 from ..state import AgentState
 
 tavily_tool = TavilySearch(max_results=3)
@@ -33,9 +34,7 @@ def researcher_node(state: AgentState):
             **merge_usage(dict(state), usage_delta),
         }
 
-    raw_out = structured_llm.invoke(
-        f"Analyze this PRD and generate 3 precise searches to collect technical data:{prd_content} "
-    )
+    raw_out = structured_llm.invoke(build_researcher_prompt(prd_content))
 
     if isinstance(raw_out, dict) and "parsed" in raw_out:
         search_input = raw_out["parsed"]
