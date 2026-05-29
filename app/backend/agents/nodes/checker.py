@@ -31,6 +31,9 @@ def checker_node(state: AgentState):
     facts = [f.strip() for f in (researcher_blob.get("facts") or []) if f and f.strip()]
     draft: str = (writer_blob.get("draft") or "").strip()
 
+    prev_fc = state.get("fastChecker") or {}
+    prev_retries = int(prev_fc.get("checker_retry_count") or 0)
+
     print("DENTRO DEL NODO CHECKER")
     print("RESEARCHER: ", researcher_blob)
     print("WRITER AGENT: ", writer_blob)
@@ -42,6 +45,7 @@ def checker_node(state: AgentState):
         "failed_facts": [],
         "confidence": 0.0,
         "requested_writer_retry": False,
+        "checker_retry_count": 0,
     }
 
     if not facts:
@@ -87,6 +91,7 @@ def checker_node(state: AgentState):
             "failed_facts": result.failed_facts,
             "confidence": confidence,
             "requested_writer_retry": requested,
+            "checker_retry_count": prev_retries + 1,
         },
         "error": None,
         "current_agent": state.get("current_agent"),

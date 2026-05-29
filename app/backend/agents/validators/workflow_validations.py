@@ -5,6 +5,7 @@ from ..state import AgentState
 WRITER_DRAFT_MIN_CHARS = 100
 WRITER_RETRY_LIMIT = 3
 CHECKER_CONFIDENCE_THRESHOLD = 0.6
+CHECKER_RETRY_LIMIT = 2
 
 
 def is_writer_draft_too_short(
@@ -34,9 +35,12 @@ def route_after_writer(state: AgentState):
 
 
 def route_after_checker(state: AgentState):
-    """added confidence, if it is less than 0.6, we will return to writer agent"""
-    fast_checker_blob = state.get("fastChecker") or {}
-    confidence = float(fast_checker_blob.get("confidence") or 0.0)
-    if confidence < CHECKER_CONFIDENCE_THRESHOLD:
+    """If draft is not verified and has failed facts, retry writer up to CHECKER_RETRY_LIMIT times."""
+    fc = state.get("fastChecker") or {}
+    verified = fc.get("verified")
+    failed_facts = fc.get("failed_facts") or []
+    retry_count = int(fc.get("checker_retry_count") or 0)
+
+    if not verified and failed_facts and retry_count < CHECKER_RETRY_LIMIT:
         return "writer"
     return "polisher"

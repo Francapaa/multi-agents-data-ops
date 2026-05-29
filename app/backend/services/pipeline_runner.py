@@ -39,6 +39,7 @@ def _empty_agent_state(prd: str, project_id: UUID) -> dict[str, Any]:
             "failed_facts": [],
             "confidence": 0.0,
             "requested_writer_retry": False,
+            "checker_retry_count": 0,
         },
         "polisherAgent": {"final_post": ""},
         "error": None,

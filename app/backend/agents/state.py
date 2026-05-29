@@ -23,6 +23,7 @@ class FastCheckerAgent(TypedDict):
     failed_facts: list[str]
     confidence: float
     requested_writer_retry: bool
+    checker_retry_count: int
 
 
 class PolisherAgent(TypedDict):
