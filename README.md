@@ -20,6 +20,8 @@ AI-driven data pipeline automation platform built with a multi-agent architectur
 | **LLM** | Google Gemini (configurable) |
 | **Task Queue** | Celery + Redis |
 | **Real-time Communication** | Server-Sent Events (SSE) |
+| **Monitoring** | LangSmith |
+
 
 ### Project Structure
 
