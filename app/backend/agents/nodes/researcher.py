@@ -34,7 +34,7 @@ def researcher_node(state: AgentState):
             **merge_usage(dict(state), usage_delta),
         }
 
-    raw_out = structured_llm.invoke(build_researcher_prompt(prd_content))
+    raw_out = structured_llm.invoke(build_researcher_prompt(prd_content)) #prompt
 
     if isinstance(raw_out, dict) and "parsed" in raw_out:
         search_input = raw_out["parsed"]
