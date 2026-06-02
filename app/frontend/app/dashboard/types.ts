@@ -51,3 +51,36 @@ export interface RecentPostRow {
 export interface RecentPostsResponse {
   posts: RecentPostRow[];
 }
+
+
+
+export interface StreamState  {
+  status: string | null;
+  progress: number | null;
+  complete: {
+    total_input_tokens: number;
+    total_output_tokens: number;
+    execution_time: number;
+  } | null;
+  error: string | null;
+};
+
+export interface Event {
+  event: string,
+  data: string
+}
+
+export interface Payload {
+  status: string,
+  progress: number
+}
+
+export interface CompletePayload{
+  total_input_tokens: number;
+  total_output_tokens: number;
+  execution_time: number;
+}
+
+export interface ErrorPayload{
+  error: string
+}

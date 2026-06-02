@@ -2,43 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/client";
+import { StreamState, Event } from "../types";
+import { parseSseBlocks } from "../utils/parseSSEBlocks";
+
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-type StreamState = {
-  status: string | null;
-  progress: number | null;
-  complete: {
-    total_input_tokens: number;
-    total_output_tokens: number;
-    execution_time: number;
-  } | null;
-  error: string | null;
-};
 
-type Event ={
-  event: string,
-  data: string
-}
-
-
-function parseSseBlocks(buffer: string): { events:Event[]; rest: string } {
-  const parts = buffer.split("\n\n");
-  const rest = parts.pop() ?? "";
-  const events: Event[] = [];
-  for (const block of parts) {
-    if (!block.trim() || block.startsWith(":")) continue;
-    let event = "message";
-    const dataLines: string[] = [];
-    for (const line of block.split("\n")) {
-      if (line.startsWith("event:")) event = line.slice(6).trim();
-      else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
-    }
-    const data = dataLines.join("\n");
-    if (data) events.push({ event, data });
-  }
-  return { events, rest };
-}
 
 export function useProjectStream(
   projectId: string | null | undefined,
@@ -67,7 +37,7 @@ export function useProjectStream(
       const { data, error } = await authClient.token();
       if (error) console.error("[SSE] authClient.token() error:", error);
       if (!data?.token) console.warn("[SSE] No token returned, data:", data);
-      if(error)console.error("ERROR: ", error)
+      if(error)console.error("ERROR: ", error)  
       console.log("TOKEN: ", data?.token)
       if (cancelled || error || !data?.token) {
         setState((s) => ({ ...s, error: "Authentication failed — no token" }));
