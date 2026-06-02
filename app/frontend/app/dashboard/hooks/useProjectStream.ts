@@ -67,6 +67,8 @@ export function useProjectStream(
       const { data, error } = await authClient.token();
       if (error) console.error("[SSE] authClient.token() error:", error);
       if (!data?.token) console.warn("[SSE] No token returned, data:", data);
+      if(error)console.error("ERROR: ", error)
+      console.log("TOKEN: ", data?.token)
       if (cancelled || error || !data?.token) {
         setState((s) => ({ ...s, error: "Authentication failed — no token" }));
         return;
