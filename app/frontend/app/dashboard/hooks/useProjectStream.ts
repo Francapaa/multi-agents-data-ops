@@ -65,10 +65,10 @@ export function useProjectStream(
         console.log(" [SSE] Connected, reading stream...");
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let finished = false
+        
         while (true) {
           const { done, value } = await reader.read();
-          if (done || finished) break;
+          if (done) break;
 
           buf += decoder.decode(value, { stream: true });
           const { events, rest } = parseSseBlocks(buf);
@@ -108,6 +108,7 @@ export function useProjectStream(
             ...currentState,
             ...calculateNextStep(currentState, event, payload) // set the state only with the function
            }))
+          
           }
         }
       } catch (e) {
