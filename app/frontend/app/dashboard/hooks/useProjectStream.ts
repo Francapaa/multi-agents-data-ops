@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/client";
-import { StreamState, Event } from "../types";
-import { parseSseBlocks } from "../utils/parseSSEBlocks";
+import { StreamState, Event, StreamPayload } from "../types";
+import { parseSseBlocks, calculateNextStep, parsePayload} from "../utils/parseSSEBlocks";
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -62,26 +62,24 @@ export function useProjectStream(
           }));
           return;
         }
-        console.log("[SSE] Connected, reading stream...");
+        console.log(" [SSE] Connected, reading stream...");
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let finished = false
         while (true) {
           const { done, value } = await reader.read();
           if (done || finished) break;
+
           buf += decoder.decode(value, { stream: true });
           const { events, rest } = parseSseBlocks(buf);
           buf = rest;
-          for (const { event, data } of events) {
-            console.log("[SSE] Event received:", event, data.slice(0, 120));
-            let payload: unknown = data;
-            try {
-              payload = JSON.parse(data);
-            } catch {
-              /* texto plano */
-            }
+
+          for (const { event, data: rawData } of events) {
+            console.log("[SSE] Event received:", event, rawData.slice(0, 120));
+            const payload = parsePayload(rawData) as StreamPayload
+
             onUpdateRef.current?.(event, payload);
-            if (event === "status" && payload && typeof payload === "object") {
+            /*if (event === "status" && payload && typeof payload === "object") {
               const p = payload as { status?: string; progress?: number };
               setState((s) => ({
                 ...s,
@@ -105,7 +103,11 @@ export function useProjectStream(
                   : String(payload);
               setState((s) => ({ ...s, error: msg }));
               finished = true // finaliza pero por error
-            }
+            }*/
+           setState((currentState) => ({
+            ...currentState,
+            ...calculateNextStep(currentState, event, payload) // set the state only with the function
+           }))
           }
         }
       } catch (e) {

@@ -84,3 +84,5 @@ export interface CompletePayload{
 export interface ErrorPayload{
   error: string
 }
+
+export type StreamPayload = Payload | ErrorPayload | CompletePayload  | Record <string, null> | null

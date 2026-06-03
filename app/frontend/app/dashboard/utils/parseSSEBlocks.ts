@@ -1,5 +1,6 @@
 
-import { Event, Payload, CompletePayload ,ErrorPayload, StreamState} from "../types";
+import { Event, Payload, CompletePayload,ErrorPayload, StreamState, StreamPayload} 
+from "../types";
 
 
 export function parseSseBlocks(buffer: string): { events:Event[]; rest: string } {
@@ -19,9 +20,6 @@ export function parseSseBlocks(buffer: string): { events:Event[]; rest: string }
     }
     return { events, rest };
   }
-
-type StreamPayload = Payload | ErrorPayload | CompletePayload  | Record <string, null> | null
-
 
 
 export function calculateNextStep(currentState: StreamState, event: string, payload: StreamPayload)
@@ -54,4 +52,14 @@ export function calculateNextStep(currentState: StreamState, event: string, payl
 
 return{};
 
+}
+
+
+export function parsePayload(rawData: string) : unknown{
+    try {
+        return JSON.parse(rawData)
+    }catch{
+        console.warn("returned as a strigng")
+        return rawData 
+    }
 }
