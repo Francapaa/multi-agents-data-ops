@@ -6,43 +6,16 @@ import {
   MetricsHealth,
   MetricsOverview,
   RecentPostRow,
+  PartialErrors,
+  DashboardState,
+  DashboardAction,
+  UseDashboardReturn,
 } from "../types";
 import { authClient } from "@/lib/auth/client";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-interface PartialErrors {
-  overview?: string;
-  costs?: string;
-  health?: string;
-  posts?: string;
-}
 
-interface DashboardState {
-  overview: MetricsOverview | null;
-  costs: MetricsCosts | null;
-  health: MetricsHealth | null;
-  posts: RecentPostRow[];
-  loading: boolean;
-  error: string | null;
-  partialErrors: PartialErrors;
-}
-
-type DashboardAction =
-  | { type: "LOAD_START" }
-  | { type: "LOAD_END" }
-  | {
-      type: "LOAD_COMPLETE";
-      payload: {
-        overview: MetricsOverview | null;
-        costs: MetricsCosts | null;
-        health: MetricsHealth | null;
-        posts: RecentPostRow[];
-        partialErrors: PartialErrors;
-        allFailed: boolean;
-      };
-    }
-  | { type: "SET_ERROR"; payload: string };
 
 const initialState: DashboardState = {
   overview: null,
@@ -79,17 +52,6 @@ function dashboardReducer(
     case "SET_ERROR":
       return { ...state, loading: false, error: action.payload };
   }
-}
-
-interface UseDashboardReturn {
-  overview: MetricsOverview | null;
-  costs: MetricsCosts | null;
-  health: MetricsHealth | null;
-  posts: RecentPostRow[];
-  loading: boolean;
-  error: string | null;
-  partialErrors: PartialErrors;
-  refetch: () => void;
 }
 
 export function useDashboard(): UseDashboardReturn {

@@ -1,18 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Project } from "../types";
+import { Project, UseProjectsReturn } from "../types";
 import { authClient } from "@/lib/auth/client";
 
 const BACKEND_URL: string | undefined = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-interface UseProjectsReturn {
-  projects: Project[];
-  totalProjects: number;
-  isLoading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
 
 export function useProjects(): UseProjectsReturn {
   const [projects, setProjects] = useState<Project[]>([]);

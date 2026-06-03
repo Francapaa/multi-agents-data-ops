@@ -86,3 +86,65 @@ export interface ErrorPayload{
 }
 
 export type StreamPayload = Payload | ErrorPayload | CompletePayload  | Record <string, null> | null
+
+// ── useDashboard.ts ──
+
+export interface PartialErrors {
+  overview?: string;
+  costs?: string;
+  health?: string;
+  posts?: string;
+}
+
+export interface DashboardState {
+  overview: MetricsOverview | null;
+  costs: MetricsCosts | null;
+  health: MetricsHealth | null;
+  posts: RecentPostRow[];
+  loading: boolean;
+  error: string | null;
+  partialErrors: PartialErrors;
+}
+
+export type DashboardAction =
+  | { type: "LOAD_START" }
+  | { type: "LOAD_END" }
+  | {
+      type: "LOAD_COMPLETE";
+      payload: {
+        overview: MetricsOverview | null;
+        costs: MetricsCosts | null;
+        health: MetricsHealth | null;
+        posts: RecentPostRow[];
+        partialErrors: PartialErrors;
+        allFailed: boolean;
+      };
+    }
+  | { type: "SET_ERROR"; payload: string };
+
+export interface UseDashboardReturn {
+  overview: MetricsOverview | null;
+  costs: MetricsCosts | null;
+  health: MetricsHealth | null;
+  posts: RecentPostRow[];
+  loading: boolean;
+  error: string | null;
+  partialErrors: PartialErrors;
+  refetch: () => void;
+}
+
+// ── useProjects.ts ──
+
+export interface UseProjectsReturn {
+  projects: Project[];
+  totalProjects: number;
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+// ── DashboardClient.tsx ──
+
+export interface DashboardClientProps {
+  streamProjectId?: string;
+}

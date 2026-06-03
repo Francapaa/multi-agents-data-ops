@@ -1,15 +1,12 @@
 "use client";
 
 import { useDashboard } from "../hooks/useDashboard";
+import { DashboardClientProps } from "../types";
 import { PipelineStats } from "./PipelineStats";
 import { PostsList } from "./PostsList";
 import { ProjectStream } from "./ProjectStream";
 import { ProjectsOverview } from "./ProjectsOverview";
 import { SystemHealth } from "./SystemHealth";
-
-interface DashboardClientProps {
-  streamProjectId?: string;
-}
 
 export function DashboardClient({
   streamProjectId,
