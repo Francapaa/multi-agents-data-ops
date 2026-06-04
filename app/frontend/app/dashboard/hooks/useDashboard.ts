@@ -16,6 +16,21 @@ import { authClient } from "@/lib/auth/client";
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 
+async function waitForToken(TimeOut = 5000){
+  const start = Date.now()
+
+  while (Date.now() - start < TimeOut){
+    const {data} = await authClient.token();
+
+    if (data?.token){
+      return data.token
+    }
+    await new Promise((r) => setTimeout(r, 200))
+  }
+  return null
+}
+
+
 
 const initialState: DashboardState = {
   overview: null,
@@ -64,15 +79,16 @@ export function useDashboard(): UseDashboardReturn {
       return;
     }
 
-    const { data, error } = await authClient.token();
-    if (error || !data?.token) {
+    const token = await waitForToken();
+
+    if (!token) {
       dispatch({ type: "LOAD_END" });
       return;
     }
 
     dispatch({ type: "LOAD_START" });
 
-    const headers = { Authorization: `Bearer ${data.token}` };
+    const headers = { Authorization: `Bearer ${token}` };
 
     const results = await Promise.allSettled([
       fetch(`${BACKEND_URL}/api/metrics/overview`, { headers, cache: "no-store" })

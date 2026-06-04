@@ -20,6 +20,7 @@ export function useProjectStream(
     complete: null,
     error: null,
   });
+  
   const abortRef = useRef<AbortController | null>(null);
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
