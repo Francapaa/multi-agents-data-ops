@@ -21,6 +21,7 @@ export function useProjects(): UseProjectsReturn {
     const { data: tokenData, error: tokenError } = await authClient.token();
     if (tokenError || !tokenData?.token) {
       setIsLoading(false);
+      setError(tokenError?.message ?? "No se pudo obtener el token de autenticación");
       return;
     }
 

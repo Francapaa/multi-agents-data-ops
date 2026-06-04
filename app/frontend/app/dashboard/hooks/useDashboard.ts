@@ -10,6 +10,7 @@ import {
   DashboardState,
   DashboardAction,
   UseDashboardReturn,
+  DashboardInitialData,
 } from "../types";
 import { authClient } from "@/lib/auth/client";
 
@@ -32,15 +33,28 @@ async function waitForToken(TimeOut = 5000){
 
 
 
-const initialState: DashboardState = {
-  overview: null,
-  costs: null,
-  health: null,
-  posts: [],
-  loading: true,
-  error: null,
-  partialErrors: {},
-};
+function buildInitialState(initialData: DashboardInitialData | null): DashboardState {
+  if (initialData) {
+    return {
+      overview: initialData.overview,
+      costs: initialData.costs,
+      health: initialData.health,
+      posts: initialData.posts,
+      loading: false,
+      error: null,
+      partialErrors: initialData.partialErrors,
+    };
+  }
+  return {
+    overview: null,
+    costs: null,
+    health: null,
+    posts: [],
+    loading: true,
+    error: null,
+    partialErrors: {},
+  };
+}
 
 function dashboardReducer(
   state: DashboardState,
@@ -69,8 +83,14 @@ function dashboardReducer(
   }
 }
 
-export function useDashboard(): UseDashboardReturn {
-  const [state, dispatch] = useReducer(dashboardReducer, initialState);
+export function useDashboard(
+  initialData: DashboardInitialData | null = null,
+): UseDashboardReturn {
+  const [state, dispatch] = useReducer(
+    dashboardReducer,
+    null,
+    () => buildInitialState(initialData),
+  );
   const initialized = useRef(false);
 
   const fetchMetrics = useCallback(async () => {
@@ -125,9 +145,11 @@ export function useDashboard(): UseDashboardReturn {
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
-      fetchMetrics();
+      if (!initialData) {
+        fetchMetrics();
+      }
     }
-  }, [fetchMetrics]);
+  }, [fetchMetrics, initialData]);
 
   return {
     overview: state.overview,

@@ -10,6 +10,7 @@ import { SystemHealth } from "./SystemHealth";
 
 export function DashboardClient({
   streamProjectId,
+  initialData,
 }: DashboardClientProps) {
   const {
     overview,
@@ -20,7 +21,7 @@ export function DashboardClient({
     error,
     partialErrors,
     refetch,
-  } = useDashboard();
+  } = useDashboard(initialData ?? null);
 
   const hasPartialErrors = Object.keys(partialErrors).length > 0;
 

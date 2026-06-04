@@ -147,4 +147,13 @@ export interface UseProjectsReturn {
 
 export interface DashboardClientProps {
   streamProjectId?: string;
+  initialData?: DashboardInitialData | null;
+}
+
+export interface DashboardInitialData {
+  overview: MetricsOverview | null;
+  costs: MetricsCosts | null;
+  health: MetricsHealth | null;
+  posts: RecentPostRow[];
+  partialErrors: PartialErrors;
 }
