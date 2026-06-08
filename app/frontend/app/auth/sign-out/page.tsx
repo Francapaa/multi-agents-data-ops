@@ -1,12 +1,7 @@
-'use server'
-import {redirect} from 'next/navigation'
-import {auth} from '@/lib/auth/server'
+"use client"
+import SignOut from "./signOut";
 
 
-
-export default async function SignOut(){
-
-    await auth.signOut();
-    redirect("/")
-
+export default async function signOutPage(){
+    await SignOut(); 
 }

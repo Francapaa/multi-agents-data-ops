@@ -3,7 +3,6 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import { SignedIn, SignedOut, UserButton } from "@neondatabase/auth/react";
-import { SignOut } from "./auth/sign-out/sign-out";
 const ThemeToggle = dynamic(() => import("@/lib/components/ui/DarkModeButton"), {
   ssr: false
 }); // estabamos tratando de saber de antemano en base a cookies/localstorage/SO si iba a venir dark o light mode
@@ -23,7 +22,6 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <SignedIn>
                 <UserButton size="icon" />
-                <button onClick={SignOut}>Cerrar sesion</button>
               </SignedIn>
               <SignedOut>
                 <Link
