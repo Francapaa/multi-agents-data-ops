@@ -1,6 +1,6 @@
 import { authClient } from "@/lib/auth/client";
 import { auth } from "@/lib/auth/server";
-
+import { redirect } from "next/navigation";
 
 export async function SignOut(){
  
@@ -13,13 +13,12 @@ export async function SignOut(){
         return
     }
 
+    const {error} = await authClient.signOut()
 
-
-    try{
-        
-    }catch(error){
-        throw error
+    if (error){
+        console.error(error)
     }
 
+    redirect("/")
 
 }
