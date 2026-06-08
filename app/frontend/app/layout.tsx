@@ -23,14 +23,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ThemeProvider>
-          <NeonAuthUIProvider
+      <NeonAuthUIProvider
             authClient={authClient}
             social={{ providers: ["google"] }}
           >
+        <ThemeProvider>
             {children}
-          </NeonAuthUIProvider>
         </ThemeProvider>
+        </NeonAuthUIProvider>
       </body>
     </html>
   );

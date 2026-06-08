@@ -1,17 +1,12 @@
+'use server'
 import {redirect} from 'next/navigation'
-import { authClient } from '@/lib/auth/client' 
+import {auth} from '@/lib/auth/server'
 
 
 
 export default async function SignOut(){
 
-    const {error} = await authClient.signOut();
-
-    if (error){
-        console.error("THE USER CANT SIGN OUT");
-        return
-    }
-    
+    await auth.signOut();
     redirect("/")
 
 }

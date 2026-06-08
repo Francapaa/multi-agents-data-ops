@@ -14,15 +14,15 @@ importers:
       '@neondatabase/serverless':
         specifier: latest
         version: 1.1.0
+      '@teispace/next-themes':
+        specifier: ^2.0.2
+        version: 2.0.2(next@16.2.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       framer-motion:
         specifier: ^11.0.0
         version: 11.18.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next:
         specifier: ^16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -1407,6 +1407,16 @@ packages:
     resolution: {integrity: sha512-J0f9s5x3LE1450nNNfYx+e/n0DMa0uOBdFJUy5r0RvmsXd4nB/n0rbHtHI1vYXhikNFan+wf51p6Tmp4c8ucrg==}
     peerDependencies:
       react: ^18 || ^19
+
+  '@teispace/next-themes@2.0.2':
+    resolution: {integrity: sha512-J7gxRIsQFrbg1VCykzpRJFJboXOviaiTx/ZHnXU5xa6MIQsYJDZJdKEsY8v8UPLFGgXYhU2UK4yob9MkNmL7uw==}
+    peerDependencies:
+      next: '>=13.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      next:
+        optional: true
 
   '@triplit/client@1.0.50':
     resolution: {integrity: sha512-3vjXTSdDQ3fzLDrewCK7elkAQc7CiDg0eZEOZInQbVMFRiakdieO5C2voSnNjSepIYHxDxFSBllgg32QsNpL9Q==}
@@ -4727,6 +4737,13 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.100.11
       react: 19.2.4
+
+  '@teispace/next-themes@2.0.2(next@16.2.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    optionalDependencies:
+      next: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
   '@triplit/client@1.0.50(typescript@5.9.3)':
     dependencies:
