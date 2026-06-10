@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ProjectStatus } from "../../components/ProjectStatus";
 
 interface ProjectViewProps {
@@ -7,17 +8,23 @@ interface ProjectViewProps {
 }
 
 export function ProjectView({ projectId }: ProjectViewProps) {
+  const [isComplete, setIsComplete] = useState(false);
+
   return (
     <div className="space-y-8">
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isComplete ? "bg-emerald-500" : "bg-emerald-500 animate-pulse"
+            }`}
+          />
           <span className="text-sm font-medium text-slate-700">
-            Pipeline en ejecución
+            {isComplete ? "Pipeline completado" : "Pipeline en ejecución"}
           </span>
         </div>
 
-        <ProjectStatus projectId={projectId} />
+        <ProjectStatus projectId={projectId} onComplete={() => setIsComplete(true)} />
       </div>
 
       <div className="flex justify-center">

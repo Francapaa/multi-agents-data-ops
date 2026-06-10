@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useProjectStream } from "@/app/dashboard/hooks/useProjectStream";
 
 const STAGES = [
@@ -17,14 +18,24 @@ function stageIndex(status: string | null): number {
 
 interface ProjectStatusProps {
   projectId: string;
+  onComplete?: () => void;
 }
 
-export function ProjectStatus({ projectId }: ProjectStatusProps) {
+export function ProjectStatus({ projectId, onComplete }: ProjectStatusProps) {
   const state = useProjectStream(projectId, () => {});
+  const hasOpenedRef = useRef(false);
 
   const current = stageIndex(state.status);
   const isError = !!state.error;
   const isComplete = !!state.complete;
+
+  useEffect(() => {
+    if (state.complete && !hasOpenedRef.current) {
+      hasOpenedRef.current = true;
+      window.open(`/new-project/${projectId}/result`, "_blank");
+      onComplete?.();
+    }
+  }, [state.complete, projectId, onComplete]);
 
   return (
     <div className="space-y-4">
