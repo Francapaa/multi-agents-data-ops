@@ -40,6 +40,7 @@ export function ProjectStatus({ projectId }: ProjectStatusProps) {
             <p>Input tokens: {state.complete.total_input_tokens}</p>
             <p>Output tokens: {state.complete.total_output_tokens}</p>
             <p>Tiempo: {state.complete.execution_time}s</p>
+            
           </div>
         </div>
       ) : (
