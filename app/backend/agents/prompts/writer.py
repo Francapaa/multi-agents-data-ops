@@ -9,7 +9,7 @@ WRITER_SYSTEM_PROMPT = (
     "- Introduction (hook the reader, explain why this matters)\n"
     "- Sections with clear subheadings\n"
     "- Conclusion with key takeaways\n"
-    "- ~800–1500 words\n\n"
+    "- ~800/1500 words\n\n"
 
     "## AUDIENCE\n"
     "Product managers, stakeholders, clients, and anyone without a technical background. "
