@@ -231,6 +231,18 @@ npm install
 npm run dev
 ```
 
+### Docker Compose
+
+```bash
+# From the app/ directory
+cd app
+
+# Build and start both services
+docker compose up --build
+```
+
+> **Note:** The Celery worker requires a Redis instance. Make sure Redis is running and accessible via the `REDIS_URL` variable in your `backend/.env` file. If you don't have Redis running locally, you can add a `redis` service to `docker-compose.yml`.
+
 ## Key Features
 
 - **Complete Automation**: From PRD to final post in a single step
