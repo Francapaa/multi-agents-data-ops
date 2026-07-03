@@ -3,6 +3,8 @@ import { SignInForm } from "./components";
 import { redirect } from "next/navigation";
 import {auth} from '@/lib/auth/server'
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Sign In - Multi-Agent DataOps",
   description: "Sign in to your account",
