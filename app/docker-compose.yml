@@ -21,3 +21,6 @@ services:
       - ./frontend/.env.local
     depends_on:
       - backend
+
+
+# add docker compose to run all the app in just one comand and terminal
