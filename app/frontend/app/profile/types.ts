@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string | null;
   email: string;
-  image: string | null;
+  image: string | null | undefined;
   emailVerified: boolean;
 }
 
@@ -18,6 +18,6 @@ export interface UserProfile {
   id: string;
   name: string | null;
   email: string;
-  image: string | null;
+  image: string | null | undefined;
   createdAt: string;
 }

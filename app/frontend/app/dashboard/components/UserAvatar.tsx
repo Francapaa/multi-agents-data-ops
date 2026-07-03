@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 interface UserAvatarProps {
-  imageUrl: string | null;
+  imageUrl: string | null | undefined;
   name: string;
   size?: number;
 }
