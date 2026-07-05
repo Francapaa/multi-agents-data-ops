@@ -1,10 +1,10 @@
-# Multi-Agent DataOps
+# PRD2Blog
 
 AI-driven data pipeline automation platform built with a multi-agent architecture using LangGraph.
 
 ## Project Description
 
-**Multi-Agent DataOps** is a web application that allows users to create projects and generate automated technical content through a system of specialized multi-agents. The system takes a Product Requirements Document (PRD) as input and transforms it into structured and verified content through a coordinated agent workflow.
+**PRD2Blog** is an AI platform that transforms Product Requirements Documents (PRDs) into publication-ready technical blog posts using a coordinated multi-agent workflow. The system researches external sources, verifies factual consistency, iterates until quality thresholds are met, and delivers a polished article while tracking token usage, execution costs, and pipeline metrics.
 
 ## System Architecture
 
