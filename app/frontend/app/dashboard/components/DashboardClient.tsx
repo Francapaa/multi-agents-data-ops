@@ -11,6 +11,7 @@ import { SystemHealth } from "./SystemHealth";
 export function DashboardClient({
   streamProjectId,
   initialData,
+  token,
 }: DashboardClientProps) {
   const {
     overview,
@@ -53,6 +54,7 @@ export function DashboardClient({
       {streamProjectId ? (
         <ProjectStream
           projectId={streamProjectId}
+          token={token}
           onComplete={refetch}
         />
       ) : null}

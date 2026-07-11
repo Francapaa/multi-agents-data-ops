@@ -6,15 +6,17 @@ import { useProjectStream } from "../hooks/useProjectStream";
 interface ProjectStreamProps {
   projectId: string | null | undefined;
   onComplete?: () => void;
+  token?: string | null;
 }
 
 export function ProjectStream({
   projectId,
   onComplete,
+  token,
 }: ProjectStreamProps) {
   const state = useProjectStream(projectId, (ev) => {
     if (ev === "complete") onComplete?.();
-  });
+  }, token);
 
   if (!projectId) return null;
 

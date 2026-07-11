@@ -19,10 +19,11 @@ function stageIndex(status: string | null): number {
 interface ProjectStatusProps {
   projectId: string;
   onComplete?: () => void;
+  token?: string | null;
 }
 
-export function ProjectStatus({ projectId, onComplete }: ProjectStatusProps) {
-  const state = useProjectStream(projectId, () => {});
+export function ProjectStatus({ projectId, onComplete, token }: ProjectStatusProps) {
+  const state = useProjectStream(projectId, () => {}, token);
   const hasOpenedRef = useRef(false);
 
   const current = stageIndex(state.status);

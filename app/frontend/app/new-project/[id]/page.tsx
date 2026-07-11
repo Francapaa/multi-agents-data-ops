@@ -19,6 +19,9 @@ export default async function ProjectDetailPage({
     redirect("/auth/sign-in");
   }
 
+  const tokenResult = await auth.token();
+  const token = tokenResult.data?.token ?? null;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
       <header className="bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800">
@@ -34,7 +37,7 @@ export default async function ProjectDetailPage({
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-8">
-        <ProjectView projectId={id} />
+        <ProjectView projectId={id} token={token} />
       </main>
     </div>
   );

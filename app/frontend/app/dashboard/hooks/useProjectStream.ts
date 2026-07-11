@@ -13,6 +13,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 export function useProjectStream(
   projectId: string | null | undefined,
   onUpdate?: (event: string, payload: unknown) => void,
+  providedToken?: string | null,
 ) {
   const [state, setState] = useState<StreamState>({
     status: null,
@@ -34,17 +35,21 @@ export function useProjectStream(
     let cancelled = false;
 
     (async () => {
-      console.log("[SSE] Fetching auth token...");
-      const { data, error } = await authClient.token();
-      if (error) console.error("[SSE] authClient.token() error:", error);
-      if (!data?.token) console.warn("[SSE] No token returned, data:", data);
-      if(error)console.error("ERROR: ", error)  
-      console.log("TOKEN: ", data?.token)
-      if (cancelled || error || !data?.token) {
-        setState((s) => ({ ...s, error: "Authentication failed — no token" }));
-        return;
+      let token: string | null = null;
+
+      if (providedToken) {
+        token = providedToken;
+        console.log("[SSE] Using provided token");
+      } else {
+        console.log("[SSE] Fetching session for JWT...");
+        const { data, error } = await authClient.getSession();
+        if (error || !data?.session?.token) {
+          console.warn("[SSE] No JWT in session, data:", data);
+          setState((s) => ({ ...s, error: "Authentication failed — no token" }));
+          return;
+        }
+        token = data.session.token;
       }
-      const token = data.token;
       console.log("[SSE] Token obtained, connecting to stream...");
 
       try {
@@ -126,7 +131,7 @@ export function useProjectStream(
     })();
 
     return () => { cancelled = true; ac.abort(); };
-  }, [projectId]);
+  }, [projectId, providedToken]);
 
   return state;
 }

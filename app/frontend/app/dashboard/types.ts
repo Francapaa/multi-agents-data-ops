@@ -148,6 +148,7 @@ export interface UseProjectsReturn {
 export interface DashboardClientProps {
   streamProjectId?: string;
   initialData?: DashboardInitialData | null;
+  token?: string | null;
 }
 
 export interface DashboardInitialData {
