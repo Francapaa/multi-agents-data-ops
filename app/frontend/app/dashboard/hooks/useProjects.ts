@@ -29,7 +29,7 @@ export function useProjects(): UseProjectsReturn {
     setError(null);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/projects`, {
+      const response = await fetch(`${BACKEND_URL}/projects`, {
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },

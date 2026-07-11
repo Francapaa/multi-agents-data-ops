@@ -12,9 +12,16 @@ export async function getProjects(): Promise<ProjectListResponse> {
     throw new Error("Unauthorized");
   }
 
-  const response = await fetch(`${BACKEND_URL}/api/projects`, {
+  const tokenResult = await auth.token();
+  const token = tokenResult.data?.token ?? null;
+
+  if (!token) {
+    throw new Error("No token available");
+  }
+
+  const response = await fetch(`${BACKEND_URL}/projects`, {
     headers: {
-      Authorization: `Bearer ${session.data?.session.ipAddress}`,
+      Authorization: `Bearer ${token}`,
     },
     cache: "no-store",
   });

@@ -14,7 +14,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_APP_URL=http://localhost:3000
-        - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+        - NEXT_PUBLIC_BACKEND_URL=/api/backend
         - NEON_AUTH_COOKIE_SECRET=${NEON_AUTH_COOKIE_SECRET}
         - NEON_AUTH_BASE_URL=${NEON_AUTH_BASE_URL}
     ports:

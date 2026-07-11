@@ -5,7 +5,7 @@ import { ProfileCard } from "./components";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Profile - DataOps",
+  title: "Profile - PRD2Post",
 };
 
 export default async function ProfilePage() {

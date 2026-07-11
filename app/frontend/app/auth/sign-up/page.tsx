@@ -2,7 +2,7 @@ import { Card, AnimatedContainer } from "@/lib/components/ui";
 import { SignUpForm } from "./components";
 
 export const metadata = {
-  title: "Sign Up - Multi-Agent DataOps",
+  title: "Sign Up - PRD2Post",
   description: "Create your account",
 };
 

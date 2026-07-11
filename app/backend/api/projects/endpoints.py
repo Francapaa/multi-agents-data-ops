@@ -74,19 +74,15 @@ async def create_project(
 ):
 
     """Create a project in pending state (ready for pipeline + SSE)."""
-    print("MENSAJE RECIBIDO DEL FRONTEND: ",message)
-    print("FILE RECIBIDO DEL FRONTEND: ", file)
-    print("USER RECIBIDO DEL FRONTEND: ", user)
-    print("DATABASE ACTUAL: ", database)
-
     user_id = _require_user_uuid(user)
+    logger.info("[PROJECTS] create_project called — user_id=%s, message=%.50s, file=%s", user_id, message or "", file.filename if file else None)
     if message:
         title = _extract_title(message)
     elif file:
         title = "PRD "+ file.filename
     else:
         title = "Nuevo proyecto sin titulo"
-    print("TITULO DEL NUEVO PROYECTO: ", title)
+    logger.info("[PROJECTS] create_project title=%s", title)
     payload = await projects_service.create_project(
         database,
         user_id,
@@ -115,7 +111,9 @@ async def list_projects(
 ):
     """List all projects for the current user."""
     user_id = _require_user_uuid(user)
+    logger.info("[PROJECTS] list_projects called — user_id=%s", user_id)
     items = await projects_service.list_projects_for_user(database, user_id)
+    logger.info("[PROJECTS] list_projects returned %s projects", len(items))
     return ProjectListResponse(projects=[ProjectResponse(**item) for item in items])
 
 
@@ -127,9 +125,12 @@ async def get_project(
 ):
     """Get a specific project by ID."""
     user_id = _require_user_uuid(user)
+    logger.info("[PROJECTS] get_project called — user_id=%s, project_id=%s", user_id, project_id)
     payload = await projects_service.get_project_for_user(database, user_id, project_id)
     if not payload:
+        logger.warning("[PROJECTS] get_project not found — project_id=%s", project_id)
         raise HTTPException(status_code=404, detail="Project not found")
+    logger.info("[PROJECTS] get_project found — project_id=%s, status=%s", project_id, payload.get("status"))
     return ProjectResponse(**payload)
 
 
@@ -142,8 +143,10 @@ async def patch_project(
 ):
     """Update cumulative metrics / status for a project."""
     user_id = _require_user_uuid(user)
+    logger.info("[PROJECTS] patch_project called — user_id=%s, project_id=%s, status=%s", user_id, project_id, body.status)
     owned = await projects_service.get_project_owned(database, user_id, project_id)
     if not owned:
+        logger.warning("[PROJECTS] patch_project not found — project_id=%s", project_id)
         raise HTTPException(status_code=404, detail="Project not found")
 
     await projects_service.patch_project_metrics(
@@ -199,8 +202,10 @@ async def stream_project(
 ):
     """SSE: eventos de progreso del pipeline y métricas finales."""
     user_id = _require_user_uuid(user)
+    logger.info("[PROJECTS] stream_project called — user_id=%s, project_id=%s", user_id, project_id)
     owned = await projects_service.get_project_owned(database, user_id, project_id)
     if not owned:
+        logger.warning("[PROJECTS] stream_project not found — project_id=%s", project_id)
         raise HTTPException(status_code=404, detail="Project not found")
 
     async def event_generator():

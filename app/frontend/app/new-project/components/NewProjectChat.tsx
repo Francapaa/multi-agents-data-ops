@@ -49,7 +49,7 @@ export function NewProjectChat() {
       formData.append("message", text);
       if (file) formData.append("file", file);
       console.log(file) // pdf is actually working
-      const res = await fetch(`${BACKEND_URL}/api/projects/upload`, {
+      const res = await fetch(`${BACKEND_URL}/projects/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${data.token}` },
         body: formData,
