@@ -5,9 +5,10 @@ import { ProjectStatus } from "../../components/ProjectStatus";
 
 interface ProjectViewProps {
   projectId: string;
+  token?: string | null;
 }
 
-export function ProjectView({ projectId }: ProjectViewProps) {
+export function ProjectView({ projectId, token }: ProjectViewProps) {
   const [isComplete, setIsComplete] = useState(false);
 
   return (
@@ -24,7 +25,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           </span>
         </div>
 
-        <ProjectStatus projectId={projectId} onComplete={() => setIsComplete(true)} />
+        <ProjectStatus projectId={projectId} token={token} onComplete={() => setIsComplete(true)} />
       </div>
 
       <div className="flex justify-center">

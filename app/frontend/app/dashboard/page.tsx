@@ -91,6 +91,7 @@ export default async function DashboardPage({
         <DashboardClient
           streamProjectId={sp.stream}
           initialData={initialData}
+          token={token}
         />
 
         <div className="flex justify-center py-8 mt-8">
