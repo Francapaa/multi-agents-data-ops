@@ -111,13 +111,13 @@ export function useDashboard(
     const headers = { Authorization: `Bearer ${token}` };
 
     const results = await Promise.allSettled([
-      fetch(`${BACKEND_URL}/metrics/overview`, { headers, cache: "no-store" })
+      fetch(`${BACKEND_URL}/api/metrics/overview`, { headers, cache: "no-store" })
         .then((r) => { if (!r.ok) throw new Error("Error al cargar overview"); return r.json() as Promise<MetricsOverview>; }),
-      fetch(`${BACKEND_URL}/metrics/costs`, { headers, cache: "no-store" })
+      fetch(`${BACKEND_URL}/api/metrics/costs`, { headers, cache: "no-store" })
         .then((r) => { if (!r.ok) throw new Error("Error al cargar costs"); return r.json() as Promise<MetricsCosts>; }),
-      fetch(`${BACKEND_URL}/metrics/health`, { headers, cache: "no-store" })
+      fetch(`${BACKEND_URL}/api/metrics/health`, { headers, cache: "no-store" })
         .then((r) => { if (!r.ok) throw new Error("Error al cargar health"); return r.json() as Promise<MetricsHealth>; }),
-      fetch(`${BACKEND_URL}/metrics/recent-posts`, { headers, cache: "no-store" })
+      fetch(`${BACKEND_URL}/api/metrics/recent-posts`, { headers, cache: "no-store" })
         .then((r) => { if (!r.ok) throw new Error("Error al cargar posts"); return r.json() as Promise<{ posts: RecentPostRow[] }>; }),
     ]);
 

@@ -5,7 +5,7 @@ import { ProjectResult } from "./types";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 interface ResultPageProps {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
     redirect("/auth/sign-in");
   }
 
-  const res = await fetch(`${BACKEND_URL}/projects/${id}`, {
+  const res = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
