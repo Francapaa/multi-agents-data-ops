@@ -20,20 +20,20 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 async function fetchMetricsServer(token: string): Promise<DashboardInitialData> {
   const authHeaders = { Authorization: `Bearer ${token}` };
   const partialErrors: PartialErrors = {};
 
   const results = await Promise.allSettled([
-    fetch(`${BACKEND_URL}/metrics/overview`, { headers: authHeaders, cache: "no-store" })
+    fetch(`${BACKEND_URL}/api/metrics/overview`, { headers: authHeaders, cache: "no-store" })
       .then((r) => { if (!r.ok) throw new Error(`overview ${r.status}`); return r.json() as Promise<MetricsOverview>; }),
-    fetch(`${BACKEND_URL}/metrics/costs`, { headers: authHeaders, cache: "no-store" })
+    fetch(`${BACKEND_URL}/api/metrics/costs`, { headers: authHeaders, cache: "no-store" })
       .then((r) => { if (!r.ok) throw new Error(`costs ${r.status}`); return r.json() as Promise<MetricsCosts>; }),
-    fetch(`${BACKEND_URL}/metrics/health`, { headers: authHeaders, cache: "no-store" })
+    fetch(`${BACKEND_URL}/api/metrics/health`, { headers: authHeaders, cache: "no-store" })
       .then((r) => { if (!r.ok) throw new Error(`health ${r.status}`); return r.json() as Promise<MetricsHealth>; }),
-    fetch(`${BACKEND_URL}/metrics/recent-posts`, { headers: authHeaders, cache: "no-store" })
+    fetch(`${BACKEND_URL}/api/metrics/recent-posts`, { headers: authHeaders, cache: "no-store" })
       .then((r) => { if (!r.ok) throw new Error(`posts ${r.status}`); return r.json() as Promise<{ posts: RecentPostRow[] }>; }),
   ]);
 

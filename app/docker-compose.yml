@@ -14,11 +14,13 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_APP_URL=http://localhost:3000
-        - NEXT_PUBLIC_BACKEND_URL=/api/backend
+        - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
         - NEON_AUTH_COOKIE_SECRET=${NEON_AUTH_COOKIE_SECRET}
         - NEON_AUTH_BASE_URL=${NEON_AUTH_BASE_URL}
     ports:
       - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
     env_file:
       - ./frontend/.env.local
     depends_on:

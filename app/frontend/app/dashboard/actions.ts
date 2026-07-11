@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth/server";
 import { ProjectListResponse } from "./types";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 export async function getProjects(): Promise<ProjectListResponse> {
   const session = await auth.getSession();
@@ -19,7 +19,7 @@ export async function getProjects(): Promise<ProjectListResponse> {
     throw new Error("No token available");
   }
 
-  const response = await fetch(`${BACKEND_URL}/projects`, {
+  const response = await fetch(`${BACKEND_URL}/api/projects`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
