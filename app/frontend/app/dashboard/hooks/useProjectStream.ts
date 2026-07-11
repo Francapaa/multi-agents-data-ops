@@ -48,7 +48,7 @@ export function useProjectStream(
       console.log("[SSE] Token obtained, connecting to stream...");
 
       try {
-        const url = `${BACKEND_URL}/api/projects/${projectId}/stream`;
+        const url = `${BACKEND_URL}/projects/${projectId}/stream`;
         console.log("[SSE] Fetching:", url);
         const res = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` },

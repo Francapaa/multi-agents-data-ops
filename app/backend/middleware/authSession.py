@@ -19,12 +19,18 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         auth_header = request.headers.get("authorization")
+        path = request.url.path
+        method = request.method
+
+        print(f"[AUTH] Request: {method} {path}")
 
         if not auth_header:
+            print(f"[AUTH] No auth header for {method} {path} — passing through")
             return await call_next(request)
 
         scheme, _, token = auth_header.partition(" ")
         if scheme.lower() != "bearer" or not token:
+            print(f"[AUTH] Invalid auth header format for {method} {path}")
             return JSONResponse(
                 status_code=401,
                 content={"detail": "Invalid authorization header"},
@@ -35,10 +41,11 @@ class NeonAuthMiddleware(BaseHTTPMiddleware):
         print(f"[AUTH] Token segments: {token.count('.')}")
         payload = await self.validate_token(token)
         if not payload:
+            print(f"[AUTH] Token validation FAILED for {method} {path}")
             return JSONResponse(status_code=401, content={"detail": "Invalid token"})
 
+        print(f"[AUTH] Token valid — user sub={payload.get('sub')} for {method} {path}")
         request.state.user = payload
-        print(payload)
         return await call_next(request)
 
     async def validate_token(self, token: str) -> dict | None:

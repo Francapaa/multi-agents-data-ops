@@ -1,9 +1,12 @@
+import logging
 from typing import Any
 from uuid import UUID, uuid4
 
 from psycopg.types.json import Json
 
 from config.database import Database
+
+logger = logging.getLogger(__name__)
 
 
 def _as_uuid(value: Any) -> UUID:

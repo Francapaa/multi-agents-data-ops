@@ -6,7 +6,7 @@ import {auth} from '@/lib/auth/server'
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Sign In - Multi-Agent DataOps",
+  title: "Sign In - PRD2Post",
   description: "Sign in to your account",
 };
 

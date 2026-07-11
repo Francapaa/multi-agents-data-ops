@@ -1,7 +1,10 @@
+import logging
 from typing import Any
 from uuid import UUID
 
 from config.database import Database
+
+logger = logging.getLogger(__name__)
 
 
 async def overview_for_user(database: Database, user_id: UUID) -> dict[str, Any]:

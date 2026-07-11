@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Multi-Agent DataOps",
-  description: "AI-powered data pipeline automation",
+  title: "PRD2Post",
+  description: "Transform PRDs into blog posts with AI",
 };
 
 export default function RootLayout({

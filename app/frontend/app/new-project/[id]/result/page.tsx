@@ -26,7 +26,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
     redirect("/auth/sign-in");
   }
 
-  const res = await fetch(`${BACKEND_URL}/api/projects/${id}`, {
+  const res = await fetch(`${BACKEND_URL}/projects/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
