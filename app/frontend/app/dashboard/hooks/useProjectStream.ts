@@ -85,31 +85,7 @@ export function useProjectStream(
             const payload = parsePayload(rawData) as StreamPayload
 
             onUpdateRef.current?.(event, payload);
-            /*if (event === "status" && payload && typeof payload === "object") {
-              const p = payload as { status?: string; progress?: number };
-              setState((s) => ({
-                ...s,
-                status: p.status ?? s.status,
-                progress: typeof p.progress === "number" ? p.progress : s.progress,
-              }));
-            }
-            if (event === "complete" && payload && typeof payload === "object") {
-              const p = payload as StreamState["complete"];
-              setState((s) => ({
-                ...s,
-                complete: p ?? null,
-                progress: 100,
-              }));
-              finished = true
-            }
-            if (event === "error") {
-              const msg =
-                payload && typeof payload === "object" && "detail" in payload
-                  ? String((payload as { detail: unknown }).detail)
-                  : String(payload);
-              setState((s) => ({ ...s, error: msg }));
-              finished = true // finaliza pero por error
-            }*/
+            
            setState((currentState) => ({
             ...currentState,
             ...calculateNextStep(currentState, event, payload) // set the state only with the function
