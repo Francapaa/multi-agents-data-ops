@@ -16,12 +16,6 @@ from middleware.authSession import NeonAuthMiddleware
 
 app = FastAPI()
 
-NEON_AUTH_BASE_URL = os.getenv("NEON_AUTH_BASE_URL")
-logger.info("[MAIN] NEON_AUTH_BASE_URL=%s", NEON_AUTH_BASE_URL)
-if NEON_AUTH_BASE_URL:
-    app.add_middleware(NeonAuthMiddleware, neon_auth_url=NEON_AUTH_BASE_URL)
-    logger.info("[MAIN] NeonAuthMiddleware added")
-
 url_frontend: str = os.getenv("FRONTEND_URL", "")
 logger.info("[MAIN] FRONTEND_URL=%s", url_frontend)
 
@@ -36,6 +30,12 @@ if _origins:
         allow_headers=["*"],
     )
     logger.info("[MAIN] CORSMiddleware added with origins: %s", _origins)
+
+NEON_AUTH_BASE_URL = os.getenv("NEON_AUTH_BASE_URL")
+logger.info("[MAIN] NEON_AUTH_BASE_URL=%s", NEON_AUTH_BASE_URL)
+if NEON_AUTH_BASE_URL:
+    app.add_middleware(NeonAuthMiddleware, neon_auth_url=NEON_AUTH_BASE_URL)
+    logger.info("[MAIN] NeonAuthMiddleware added")
 
 logger.info("[MAIN] Neon DB connection string set: %s", "yes" if os.getenv("NEON_DATABASE_CONNECTION_STRING") else "NO")
 logger.info("[MAIN] Redis URL set: %s", "yes" if os.getenv("REDIS_URL") else "NO")
