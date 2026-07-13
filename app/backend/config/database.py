@@ -41,7 +41,6 @@ class Database:
                     return None
                 columns = [desc[0] for desc in cur.description]
                 row = await cur.fetchone()
-                logger.info("[DB] execute_one result: %s", dict(row) if row else None)
                 return dict(zip(columns, row)) if row else None
 
 
