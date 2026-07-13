@@ -98,10 +98,15 @@ export function useProjectStream(
           console.log("[SSE] Aborted");
           return;
         }
-        console.error("[SSE] Fetch error:", e);
+        const err = e instanceof TypeError
+          ? "Network error — check if backend is running or if CORS preflight failed"
+          : e instanceof Error
+            ? e.message
+            : "Stream error";
+        console.error("[SSE] Fetch error LOG:", e);
         setState((s) => ({
           ...s,
-          error: e instanceof Error ? e.message : "Stream error",
+          error: err,
         }));
       }
     })();
