@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ProjectStatus } from "../../components/ProjectStatus";
 
 interface ProjectViewProps {
@@ -9,23 +9,19 @@ interface ProjectViewProps {
 }
 
 export function ProjectView({ projectId, token }: ProjectViewProps) {
-  const [isComplete, setIsComplete] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="space-y-8">
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-6 py-5">
         <div className="flex items-center gap-3 mb-4">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isComplete ? "bg-emerald-500" : "bg-emerald-500 animate-pulse"
-            }`}
-          />
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-sm font-medium text-slate-700">
-            {isComplete ? "Pipeline completado" : "Pipeline en ejecución"}
+            Pipeline en ejecución
           </span>
         </div>
 
-        <ProjectStatus projectId={projectId} token={token} onComplete={() => setIsComplete(true)} />
+        <ProjectStatus projectId={projectId} token={token} onComplete={() => router.push(`/new-project/${projectId}/result`)} />
       </div>
 
       <div className="flex justify-center">

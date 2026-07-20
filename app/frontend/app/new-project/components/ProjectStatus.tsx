@@ -24,19 +24,18 @@ interface ProjectStatusProps {
 
 export function ProjectStatus({ projectId, onComplete, token }: ProjectStatusProps) {
   const state = useProjectStream(projectId, () => {}, token);
-  const hasOpenedRef = useRef(false);
+  const calledRef = useRef(false);
 
   const current = stageIndex(state.status);
   const isError = !!state.error;
   const isComplete = !!state.complete;
 
   useEffect(() => {
-    if (state.complete && !hasOpenedRef.current) {
-      hasOpenedRef.current = true;
-      window.open(`/new-project/${projectId}/result`, "_blank");
+    if (state.complete && !calledRef.current) {
+      calledRef.current = true;
       onComplete?.();
     }
-  }, [state.complete, projectId, onComplete]);
+  }, [state.complete, onComplete]);
 
   return (
     <div className="space-y-4">
