@@ -8,6 +8,14 @@ services:
     env_file:
       - ./backend/.env
 
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["worker"]
+    env_file:
+      - ./backend/.env
+
   frontend:
     build:
       context: ./frontend
@@ -26,5 +34,12 @@ services:
     depends_on:
       - backend
 
-
-# add docker compose to run all the app in just one comand and terminal
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["worker"]
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - backend
