@@ -13,6 +13,13 @@ from services.redis_client import publish_event
 
 # we force to use SelectorEventLoop compatible with psycopg
 
+""" 
+
+estamos teniendo problemas para que se ejecute el pipeline
+hay un problema de tipos de datos.
+
+"""
+
 
 logger = logging.getLogger(__name__)
 
