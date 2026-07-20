@@ -13,7 +13,7 @@ from services.redis_client import publish_event
 
 # we force to use SelectorEventLoop compatible with psycopg
 
-
+    
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,3 @@ def process_project(
     if sys.platform == "win32":
         return asyncio.run(_run(), loop_factory=asyncio.SelectorEventLoop)
     return asyncio.run(_run())
-                               
-    """ hacer tantas llamadas asincronas genera distintos event loops
-        cada uno se ejecuta y destruye al anterior"""
