@@ -1,4 +1,5 @@
-import {redirect} from 'next/navigation';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { auth } from "@/lib/auth/server";
 import {
   CreateProjectButton,
@@ -61,7 +62,7 @@ export default async function DashboardPage({
   const { data: session } = await auth.getSession();
   const sp = await searchParams;
 
-  if (!session?.user){
+  if (!session?.user) {
     redirect('/auth/sign-in')
   }
 
@@ -73,30 +74,47 @@ export default async function DashboardPage({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
-      <header className="bg-white dark:bg-gray-950 border-b border-slate-100 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-          {session?.user?.image && (
-            <UserAvatar
-              imageUrl={session.user.image}
-              name={session.user.name || session.user.email}
-              size={40}
-            />
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen mesh-bg noise-overlay">
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Gradient header */}
+        <header className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-950/20 dark:to-transparent" />
+          <div
+            className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-40 dark:opacity-20"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(37,99,235,0.15) 0%, transparent 60%)",
+              filter: "blur(60px)",
+            }}
+          />
+          <div className="relative max-w-4xl mx-auto px-6 py-6 flex justify-between items-center">
+            <div>
+              <Link href="/" className="text-2xl font-bold text-blue-600 font-display tracking-tight">
+                PRD2Post
+              </Link>
+              <h1 className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Dashboard</h1>
+            </div>
+            {session?.user?.image && (
+              <UserAvatar
+                imageUrl={session.user.image}
+                name={session.user.name || session.user.email}
+                size={40}
+              />
+            )}
+          </div>
+        </header>
 
-      <div className="max-w-4xl mx-auto py-12 px-6">
-        <DashboardClient
-          streamProjectId={sp.stream}
-          initialData={initialData}
-          token={token}
-        />
+        <div className="flex-1 max-w-4xl mx-auto w-full py-10 px-6">
+          <DashboardClient
+            streamProjectId={sp.stream}
+            initialData={initialData}
+            token={token}
+          />
 
-        <div className="flex justify-center py-8 mt-8">
-          <div className="w-full max-w-md">
-            <CreateProjectButton />
+          <div className="flex justify-center py-8 mt-8">
+            <div className="w-full max-w-md">
+              <CreateProjectButton />
+            </div>
           </div>
         </div>
       </div>

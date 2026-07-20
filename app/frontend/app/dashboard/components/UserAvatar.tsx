@@ -47,11 +47,13 @@ export function UserAvatar({ imageUrl, name, size = 40 }: UserAvatarProps) {
           <img
             src={imageUrl}
             alt={name}
-            className="w-full h-full rounded-full object-cover ring-2 ring-blue-100 hover:ring-blue-300 transition-all"
+            className="w-full h-full rounded-full object-cover ring-2 ring-white/80 dark:ring-gray-800/80 hover:ring-blue-300 transition-all"
+            style={{ transition: "ring 200ms cubic-bezier(0.23, 1, 0.32, 1)" }}
           />
         ) : (
           <div
-            className={`w-full h-full rounded-full ${bgColor} flex items-center justify-center ring-2 ring-blue-100 hover:ring-blue-300 transition-all`}
+            className={`w-full h-full rounded-full ${bgColor} flex items-center justify-center ring-2 ring-white/80 dark:ring-gray-800/80 hover:ring-blue-300 transition-all`}
+            style={{ transition: "ring 200ms cubic-bezier(0.23, 1, 0.32, 1)" }}
           >
             <span
               className="text-white font-semibold select-none"

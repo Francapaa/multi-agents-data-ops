@@ -25,9 +25,10 @@ export function Button({ variant = "primary", isLoading, children, className = "
       type={type}
       disabled={disabled || isLoading}
       whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`w-full py-3 px-4 font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`w-full py-3 px-4 font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      style={{ transition: "transform 160ms cubic-bezier(0.23, 1, 0.32, 1)" }}
     >
       {isLoading ? "Loading..." : children}
     </motion.button>
