@@ -49,6 +49,7 @@ def _project_payload(project_row: dict[str, Any], post: dict[str, Any] | None) -
         "total_output_tokens": int(project_row.get("total_output_tokens") or 0),
         "execution_time_seconds": int(project_row.get("execution_time_seconds") or 0),
         "retry_count": int(project_row.get("retry_count") or 0),
+        "target_audience": project_row.get("target_audience") or "b2c",
     }
 
 
@@ -56,7 +57,7 @@ async def list_projects_for_user(database: Database, user_id: UUID) -> list[dict
     projects_data = await database.execute(
         """
         SELECT
-          id, title, status, created_at,
+          id, title, status, created_at, target_audience,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
         WHERE user_id = %s
@@ -78,7 +79,7 @@ async def get_project_for_user(
     projects_data = await database.execute(
         """
         SELECT
-          id, title, status, created_at,
+          id, title, status, created_at, target_audience,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
         WHERE id = %s AND user_id = %s
@@ -101,7 +102,7 @@ async def get_project_owned(
     return await database.execute_one(
         """
         SELECT
-          id, user_id, title, prd, status, created_at,
+          id, user_id, title, prd, status, created_at, target_audience,
           total_input_tokens, total_output_tokens, execution_time_seconds, retry_count
         FROM projects
         WHERE id = %s AND user_id = %s
@@ -116,14 +117,15 @@ async def create_project(
     *,
     title: str,
     prd: str,
+    target_audience: str = "b2c",
 ) -> dict[str, Any]:
     new_id = uuid4()
     await database.execute(
         """
-        INSERT INTO projects (id, user_id, title, prd, status)
-        VALUES (%s, %s, %s, %s, 'pending')
+        INSERT INTO projects (id, user_id, title, prd, target_audience, status)
+        VALUES (%s, %s, %s, %s, %s, 'pending')
         """,
-        (new_id, user_id, title, prd),
+        (new_id, user_id, title, prd, target_audience),
     )
     loaded = await get_project_for_user(database, user_id, new_id)
     if not loaded:

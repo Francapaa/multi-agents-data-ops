@@ -22,11 +22,12 @@ NODE_PROGRESS: dict[str, tuple[str, int]] = {
 _STREAM_DONE = object()
 
 
-def _empty_agent_state(prd: str, project_id: UUID) -> dict[str, Any]:
+def _empty_agent_state(prd: str, project_id: UUID, target_audience: str = "b2c") -> dict[str, Any]:
     return {
         "prd": prd,
         "project_id": project_id,
         "run_id": uuid.uuid4(),
+        "target_audience": target_audience,
         "researcher": {
             "search_queries": [],
             "sources": [],
@@ -67,6 +68,7 @@ async def run_pipeline(
             return
 
         prd = (row.get("prd") or "").strip()
+        target_audience = row.get("target_audience") or "b2c"
         if not prd:
             await projects_service.patch_project_metrics(
                 database,
@@ -85,7 +87,7 @@ async def run_pipeline(
             execution_time_seconds=0,
         )
 
-        initial = _empty_agent_state(prd, project_id)
+        initial = _empty_agent_state(prd, project_id, target_audience)
         app = get_compiled_workflow()
         stream_iter = iter(app.stream(initial, stream_mode="updates"))
         full_state = dict(initial)

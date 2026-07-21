@@ -8,6 +8,7 @@ export interface Project {
   total_output_tokens?: number;
   execution_time_seconds?: number;
   retry_count?: number;
+  target_audience?: string;
 }
 
 export interface ProjectPost {

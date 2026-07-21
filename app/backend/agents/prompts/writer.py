@@ -1,4 +1,19 @@
-WRITER_SYSTEM_PROMPT = (
+_AUDIENCE_MAP = {
+    "b2b": (
+        "Business owners, executives, and decision-makers evaluating this solution "
+        "for their organization. They care about ROI, operational efficiency, "
+        "competitive advantage, and scalability. Use business-oriented language "
+        "and emphasize concrete business outcomes."
+    ),
+    "b2c": (
+        "End users, consumers, and people looking for a better experience in their "
+        "daily lives. They care about ease of use, tangible benefits, and how it "
+        "makes their life simpler or better. Use relatable, benefit-driven language "
+        "and focus on the emotional and practical value."
+    ),
+}
+
+_BASE_PROMPT = (
     "You are a senior technical writer specialized in translating complex technical concepts "
     "into engaging, accessible blog posts for a non-technical audience.\n\n"
 
@@ -10,10 +25,6 @@ WRITER_SYSTEM_PROMPT = (
     "- Sections with clear subheadings\n"
     "- Conclusion with key takeaways\n"
     "- ~800/1500 words\n\n"
-
-    "## AUDIENCE\n"
-    "Product managers, stakeholders, clients, and anyone without a technical background. "
-    "Assume they are smart but unfamiliar with the technical details.\n\n"
 
     "## TONE & STYLE\n"
     "- Conversational, educational, and confident\n"
@@ -86,3 +97,15 @@ WRITER_SYSTEM_PROMPT = (
     "\n"
     "Big retailers have had this capability for years — but they pay teams of data scientists and custom software. SMBs deserve the same intelligence, packaged for someone who just wants to run their store better."
 )
+
+
+def build_writer_prompt(target_audience: str) -> str:
+    audience_description = _AUDIENCE_MAP.get(
+        target_audience,
+        target_audience or "A general non-technical audience.",
+    )
+    return (
+        f"## AUDIENCE\n{audience_description}\n\n"
+        f"Assume they are smart but unfamiliar with the technical details.\n\n"
+        f"{_BASE_PROMPT}"
+    )

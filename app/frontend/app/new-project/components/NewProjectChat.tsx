@@ -13,6 +13,8 @@ export function NewProjectChat() {
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [audience, setAudience] = useState("b2c");
+  const [customAudience, setCustomAudience] = useState("");
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   function autoResize() {
@@ -48,6 +50,7 @@ export function NewProjectChat() {
       const formData = new FormData();
       formData.append("message", text);
       if (file) formData.append("file", file);
+      formData.append("audience", audience === "other" ? customAudience.trim() || "b2c" : audience);
       console.log(file) // pdf is actually working
       const res = await fetch(`${BACKEND_URL}/api/projects/upload`, {
         method: "POST",
@@ -91,6 +94,33 @@ export function NewProjectChat() {
         )}
 
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-3">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className="text-slate-500 mr-1">Para:</span>
+            {["b2c", "b2b", "other"].map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setAudience(opt)}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  audience === opt
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                }`}
+              >
+                {opt === "b2c" ? "B2C" : opt === "b2b" ? "B2B" : "Otro"}
+              </button>
+            ))}
+            {audience === "other" && (
+              <input
+                type="text"
+                value={customAudience}
+                onChange={(e) => setCustomAudience(e.target.value)}
+                placeholder="Ej: inversores, developers..."
+                className="ml-1 px-3 py-1.5 text-xs border border-slate-200 rounded-full outline-none focus:border-blue-400 w-44"
+              />
+            )}
+          </div>
+
           <FileUpload
             onFileSelected={(f) => setFile(f)}
             onFileRemoved={() => setFile(null)}

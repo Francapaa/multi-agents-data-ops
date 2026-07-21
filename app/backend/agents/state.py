@@ -35,6 +35,7 @@ class AgentState(TypedDict):
     prd: str
     project_id: uuid.UUID
     run_id: uuid.UUID
+    target_audience: str
 
     # AGENTS
     researcher: ResearcherAgent
