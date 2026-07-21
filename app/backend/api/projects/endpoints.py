@@ -69,6 +69,7 @@ def _extract_title(message: str) -> str: # esto solo funciona por ahora si es un
 async def create_project(
     message: Optional[str] = Form(None), #tambien none porque puede venir solo el file
     file: Optional[UploadFile] = File(None),
+    audience: str = Form("b2c"),
     user: dict = Depends(get_current_user),
     database: Database = Depends(get_db),
 ):
@@ -88,6 +89,7 @@ async def create_project(
         user_id,
         title=title,
         prd=(message or "").strip(),
+        target_audience=audience,
     )
 
     project_id = str(payload["id"])

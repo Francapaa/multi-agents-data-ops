@@ -32,6 +32,7 @@ def polisher_node(state: AgentState):
         f.strip() for f in (checker_blob.get("failed_facts") or []) if f and f.strip()
     ]
     prd = (state.get("prd") or "").strip()
+    target_audience = state.get("target_audience") or "b2c"
 
     if not draft:
         return {
@@ -54,7 +55,7 @@ def polisher_node(state: AgentState):
     )
 
     raw_out = structured_llm.invoke(
-        build_polisher_prompt(prd, facts_block, failed_facts_block, draft) #prompt
+        build_polisher_prompt(prd, facts_block, failed_facts_block, draft, target_audience) #prompt
     )
     usage_delta = {"input": 0, "output": 0}
     if isinstance(raw_out, dict) and "parsed" in raw_out:

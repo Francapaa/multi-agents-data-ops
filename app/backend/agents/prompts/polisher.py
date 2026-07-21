@@ -1,12 +1,33 @@
+_AUDIENCE_MAP = {
+    "b2b": (
+        "Business owners, executives, and decision-makers evaluating this solution "
+        "for their organization. They care about ROI, operational efficiency, "
+        "competitive advantage, and scalability."
+    ),
+    "b2c": (
+        "End users, consumers, and people looking for a better experience in their "
+        "daily lives. They care about ease of use, tangible benefits, and how it "
+        "makes their life simpler or better."
+    ),
+}
+
+
 def build_polisher_prompt(
     prd: str,
     facts_block: str,
     failed_facts_block: str,
     draft: str,
+    target_audience: str = "b2c",
 ) -> str:
+    audience_description = _AUDIENCE_MAP.get(
+        target_audience,
+        target_audience or "A general non-technical audience.",
+    )
     return (
         "You are a senior blog editor specialized in making technical content shine "
         "for a non-technical audience.\n\n"
+
+        f"This post is aimed at: {audience_description}\n\n"
 
         "Polish the WRITER DRAFT into a polished, publication-ready blog post.\n\n"
 

@@ -1,7 +1,7 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from ..llm_connection import extract_usage_metadata, llm_connection, merge_usage
-from ..prompts import WRITER_SYSTEM_PROMPT
+from ..prompts import build_writer_prompt
 from ..state import AgentState
 
 llm = llm_connection()
@@ -12,6 +12,7 @@ def writer_node(state: AgentState):
     Reads full AgentState; builds draft mainly from researcher.facts and the PRD.
     """
     prd_content = state["prd"]
+    target_audience = state.get("target_audience") or "b2c"
     researcher_blob = state.get("researcher") or {}
     checker_blob = state.get("fastChecker") or {}
     facts: list[str] = researcher_blob.get("facts") or []
@@ -34,7 +35,7 @@ def writer_node(state: AgentState):
         messages = [
             SystemMessage(
                 content=(
-                    f"{WRITER_SYSTEM_PROMPT}\n\n" #prompt if failed facts
+                    f"{build_writer_prompt(target_audience)}\n\n" #prompt if failed facts
                     "The previous version had factual issues. Rewrite the draft fixing the "
                     "failed facts listed below. Correct or remove unsupported claims. "
                     "Keep the blog post format and non-technical tone."
@@ -54,7 +55,7 @@ def writer_node(state: AgentState):
     else:
         messages = [
             SystemMessage(
-                content=WRITER_SYSTEM_PROMPT, #prompt is not failedfacts
+                content=build_writer_prompt(target_audience), #prompt is not failedfacts
             ),
             HumanMessage(
                 content=(
