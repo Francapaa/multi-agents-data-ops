@@ -27,3 +27,22 @@ jobs:
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)/app #if test doesnt exist in /backend maybe is in /app/backend
         pytest app/backend
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      working-directory: app/frontend
+    - name: Run frontend tests
+      run: pnpm test
+      working-directory: app/frontend
